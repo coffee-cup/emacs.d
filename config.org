@@ -544,3 +544,182 @@ Git god mod
     :config
     (global-undo-tree-mode))
 #+END_SRC
+
+* Languages
+** Syntax Checking
+
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck
+    :init (global-flycheck-mode))
+
+  (defun flycheck-list-errors-toggle ()
+    "Toggle the error list for the current buffer."
+    (interactive)
+    (let ((flycheck-errors-window (get-buffer-window flycheck-error-list-buffer)))
+      (if (not (window-live-p flycheck-errors-window))
+          (call-interactively 'flycheck-list-errors)
+        (delete-window flycheck-errors-window))))
+
+  (load "~/.emacs.d/flycheck-inline.el")
+  (setq flycheck-display-errors-delay 0.3)
+  (with-eval-after-load 'flycheck-inline
+    (flycheck-inline-mode))
+#+END_SRC
+
+** Rust
+
+#+BEGIN_SRC emacs-lisp
+  (use-package racer
+    :config
+    (general-define-key rust-mode-map
+                        "TAB" 'company-indent-or-complete-common)
+    (setq company-tooltip-align-annotations t
+          rust-format-on-save t)
+    :hook ((rust-mode . racer-mode)
+           (racer-mode . eldoc-mode)
+           (racer-mode . company-mode)))
+#+END_SRC
+
+** Go
+
+#+BEGIN_SRC emacs-lisp
+  (use-package go-mode)
+#+END_SRC
+
+** JavaScript
+*** Js2
+
+#+BEGIN_SRC emacs-lisp
+  (use-package js2-mode)
+
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+
+  ;; better imenu
+  (add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
+
+  ;; configs
+  (setq js-indent-level 2)
+#+END_SRC
+
+*** Jsx
+
+React stuff
+
+#+BEGIN_SRC emacs-lisp
+  (use-package rjsx-mode)
+  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
+#+END_SRC
+
+*** Tern
+
+#+BEGIN_SRC emacs-lisp
+  (use-package tern)
+  (add-hook 'js-mode-hook (lambda () (tern-mode t)))
+#+END_SRC
+
+*** Autocomplete
+
+#+BEGIN_SRC emacs-lisp
+  (use-package company-tern :straight t)
+  (add-to-list 'company-backends 'company-tern)
+  (add-hook 'js2-mode-hook (lambda ()
+                              (tern-mode)
+                              (company-mode)))
+#+END_SRC
+
+*** Eslint
+
+#+BEGIN_SRC emacs-lisp
+  ;; disable jshint since we prefer eslint
+  (setq-default flycheck-disabled-checkers
+              (append flycheck-disabled-checkers
+                      '(javascript-jshint)))
+
+  ;; use eslint with web-mode for jsx files
+  (flycheck-add-mode 'javascript-eslint 'web-mode)
+#+END_SRC
+
+Use local version of eslint is available
+
+#+BEGIN_SRC emacs-lisp
+  ;; https://github.com/purcell/exec-path-from-shell
+  ;; only need exec-path-from-shell on OSX
+  ;; this hopefully sets up path and other vars better
+  (use-package exec-path-from-shell :straight t)
+  (when (memq window-system '(mac ns))
+  (exec-path-from-shell-initialize))
+
+  ;; use local eslint from node_modules before global
+  ;; http://emacs.stackexchange.com/questions/21205/flycheck-with-file-relative-eslint-executable
+  (defun my/use-eslint-from-node-modules ()
+  (let* ((root (locate-dominating-file
+                  (or (buffer-file-name) default-directory)
+                  "node_modules"))
+          (eslint (and root
+                      (expand-file-name "node_modules/eslint/bin/eslint.js"
+                                          root))))
+      (when (and eslint (file-executable-p eslint))
+      (setq-local flycheck-javascript-eslint-executable eslint))))
+  (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
+#+END_SRC
+
+*** Prettier
+
+#+BEGIN_SRC emacs-lisp
+  (use-package prettier-js :straight t)
+
+  (setq prettier-js-args '(
+                          "--trailing-comma" "all"
+                          "--single-quote" "false"))
+
+   (eval-after-load 'web-mode
+      '(progn
+         (add-hook 'web-mode-hook #'add-node-modules-path)
+         (add-hook 'web-mode-hook #'prettier-js-mode)))
+
+  (add-hook 'typescript-mode-hook #'prettier-js-mode)
+  (add-hook 'js2-mode-hook #'prettier-js-mode)
+  (add-hook 'json-mode-hook #'prettier-js-mode)
+#+END_SRC
+
+*** Typescripts
+
+#+BEGIN_SRC emacs-lisp
+  (use-package tide
+    :after (typescript-mode company flycheck)
+    :hook ((typescript-mode . tide-setup)
+           (typescript-mode . tide-hl-identifier-mode)))
+
+  (setq company-tooltip-align-annotations t)
+  (setq typescript-indent-level 2)
+
+  (defun tide-format()
+    (message "nop"))
+
+  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
+  (add-hook 'web-mode-hook
+            (lambda ()
+              (when (string-equal "tsx" (file-name-extension buffer-file-name))
+                (setup-tide-mode))))
+
+  ;; enable typescript-tslint checker
+  (flycheck-add-mode 'typescript-tslint 'web-mode)
+
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (setq flycheck-check-syntax-automatically '(save mode-enabled))
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    (tide-restart-server)
+    (company-mode +1))
+
+  ;; aligns annotation to the right hand side
+  (setq company-tooltip-align-annotations t)
+
+  ;; formats the buffer before saving
+  ; (add-hook 'before-save-hook 'tide-format-before-save)
+  (add-hook 'typescript-mode-hook #'setup-tide-mode)
+#+END_SRC
+

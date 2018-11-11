@@ -185,6 +185,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
   (add-hook 'text-mode-hook 'better-text-hook)
   (add-hook 'markdown-mode-hook 'better-text-hook)
 #+END_SRC
+
 * Icons
 
 #+BEGIN_SRC emacs-lisp
@@ -202,6 +203,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 
   (load-theme 'doom-dracula t)
 #+END_SRC
+
 * Modeline
 
 #+BEGIN_SRC emacs-lisp
@@ -229,6 +231,13 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     :defer t
     :config
     (global-emoify-mode))
+#+END_SRC
+
+* Files
+
+#+BEGIN_SRC emacs-lisp
+  (general-define-key
+    "C-x C-r" 'counsel-recentf)
 #+END_SRC
 
 * Buffers
@@ -345,6 +354,15 @@ Git god mod
 
   (general-define-key
    "C-x C-g" 'magit)
+#+END_SRC
+
+* Projects
+
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile)
+  (use-package counsel-projectile)
+  (projectile-mode)
+  (counsel-projectile-mode)
 #+END_SRC
 
 * Org Mode
@@ -592,7 +610,7 @@ Git god mod
   (defhydra hydra-zoom nil
     "zoom"
     ("g" text-scale-increase "in")
-    ("l" text-scale-decrease "out")
+    ("l" text-scale-decrease "out"))
 #+END_SRC
 
 ** Windows

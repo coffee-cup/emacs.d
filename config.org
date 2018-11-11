@@ -231,6 +231,38 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     (global-emoify-mode))
 #+END_SRC
 
+* Buffers
+
+#+BEGIN_SRC emacs-lisp
+  (defun switch-to-previous-buffer ()
+    (interactive)
+    (switch-to-buffer (other-buffer)))
+
+  (global-unset-key (kbd "C-x C-b"))
+
+  (general-define-key
+   "C-x TAB" '(switch-to-previous-buffer :which-key "prev buffer")
+   "C-x C-b" '(:ignore t :which-key "buffers")
+   "C-x C-b d" '(kill-current-buffer :which-key "delete buffer"))
+#+END_SRC
+
+* Window Management
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ace-window)
+#+END_SRC
+
+* Expand Region
+
+#+BEGIN_SRC emacs-lisp
+  (use-package expand-region
+    :config
+    (setq delete-selection-mode t))
+
+  (general-define-key
+   "C-=" 'er/expand-region)
+#+END_SRC
+
 * Parens
 
 #+BEGIN_SRC emacs-lisp
@@ -330,7 +362,10 @@ Git god mod
                               (visual-line-mode)
                               (org-indent-mode)))
 
-  (setq org-startup-indented t)
+  (defun disable-fylcheck-in-org-src-block ()
+    (flycheck-mode -1))
+
+  (add-hook 'org-src-mode-hook 'disable-fylcheck-in-org-src-block)
 #+END_SRC
 
 ** Agenda
@@ -545,6 +580,90 @@ Git god mod
     (global-undo-tree-mode))
 #+END_SRC
 
+* Hydra
+
+#+BEGIN_SRC emacs-lisp
+  (use-package hydra)
+#+END_SRC
+
+** Text Size
+
+#+BEGIN_SRC emacs-lisp
+  (defhydra hydra-zoom nil
+    "zoom"
+    ("g" text-scale-increase "in")
+    ("l" text-scale-decrease "out")
+#+END_SRC
+
+** Windows
+
+#+BEGIN_SRC emacs-lisp
+  (defhydra hydra-window (:color red
+                                 :hint nil)
+    "
+    Movement^^        ^Split^         ^Switch^     ^Delete^
+  ----------------------------------------------------------
+  _h_ ←           _v_ertical      _b_uffer       _da_ce
+  _j_ ↓           _x_ horizontal  _f_ind files   _da_ce
+  _k_ ↑                         _s_wap         _dw_indow
+  _l_ →                         _a_ce 1        _db_uffer
+
+                  _D_lt Other     _S_ave
+  _q_ cancel
+  "
+    ("h" windmove-left )
+    ("j" windmove-down )
+    ("k" windmove-up )
+    ("l" windmove-right )
+    ("v" (lambda ()
+           (interactive)
+           (split-window-right)
+           (windmove-right))
+     )
+    ("x" (lambda ()
+           (interactive)
+           (split-window-below)
+           (windmove-down))
+     )
+    ("a" ace-window :exit t)
+    ("b" ivy-switch-buffer)
+    ("f" counsel-find-file)
+    ("s" ace-swap-window)
+    ("S" save-buffer)
+    ("da" ace-delete-window)
+    ("dw" delete-window)
+    ("db" kill-this-buffer)
+    ("D" (lambda ()
+           (interactive)
+           (ace-window 16)
+           (add-hook 'ace-window-end-once-hook
+                     'hydra-window/body)))
+     ("q" nil)
+     )
+
+    (general-define-key
+     "C-x C-w" '(hydra-window/body :which-key "window hydra"))
+#+END_SRC
+
+** Flycheck
+
+#+BEGIN_SRC emacs-lisp
+  (defhydra hydra-flycheck
+    (:pre (progn (setq hydra-lv t) (flycheck-list-errors))
+     :post (progn (setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
+     :hint nil)
+    "Errors"
+    ("f"  flycheck-error-list-set-filter                            "Filter")
+    ("n"  flycheck-next-error                                       "Next")
+    ("p"  flycheck-previous-error                                   "Previous")
+    ("gg" flycheck-first-error                                      "First")
+    ("G"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
+    ("q"  nil))
+
+  (general-define-key
+   "C-x f" '(hydra-flycheck/body :which-key "hydra flycheck"))
+#+END_SRC
+
 * Languages
 ** Syntax Checking
 
@@ -584,6 +703,35 @@ Git god mod
 
 #+BEGIN_SRC emacs-lisp
   (use-package go-mode)
+#+END_SRC
+
+** Haskell
+
+#+BEGIN_SRC emacs-lisp
+  (use-package haskell-mode
+    :config
+    (add-to-list 'auto-mode-alist '("\\.hs" . haskell-mode))
+    :hook ((haskell-mode . #'hindent-mode)))
+
+  (use-package intero
+    :after haskell-mode
+    :hook ((haskell-mode . intero-mode)))
+
+  (with-eval-after-load 'intero
+    (flycheck-add-next-checker 'intero '(warning . haskell-hlint)))
+
+  (use-package company-ghci
+    :config
+    (add-to-list 'company-backends 'company-ghci))
+
+  (use-package hasky-stack)
+#+END_SRC
+
+** Elixir
+
+#+BEGIN_SRC emacs-lisp
+  (use-package elixir-mode)
+  (use-package alchemist)
 #+END_SRC
 
 ** JavaScript
@@ -663,6 +811,12 @@ Use local version of eslint is available
   (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
 #+END_SRC
 
+*** Json
+
+#+BEGIN_SRC emacs-lisp
+  (use-package json-mode)
+#+END_SRC
+
 *** Prettier
 
 #+BEGIN_SRC emacs-lisp
@@ -682,7 +836,7 @@ Use local version of eslint is available
   (add-hook 'json-mode-hook #'prettier-js-mode)
 #+END_SRC
 
-*** Typescripts
+*** Typescript
 
 #+BEGIN_SRC emacs-lisp
   (use-package tide
@@ -723,3 +877,45 @@ Use local version of eslint is available
   (add-hook 'typescript-mode-hook #'setup-tide-mode)
 #+END_SRC
 
+** Web
+
+#+BEGIN_SRC emacs-lisp
+  (use-package web-mode
+    :config
+    (setq web-mode-markup-indent-offset 2
+          web-mode-css-indent-offset 2
+          web-mode-code-indent-offset 2))
+
+  ;; only use prettier for js/jsx web mode files
+  (defun enable-minor-mode (my-pair)
+    "Enable minor mode if filename match the regexp.  MY-PAIR is a cons cell (regexp . minor-mode)."
+    (if (buffer-file-name)
+        (if (string-match (car my-pair) buffer-file-name)
+            (funcall (cdr my-pair)))))
+
+  (add-hook 'web-mode-hook #'(lambda ()
+                               (enable-minor-mode
+                                '("\\.jsx?\\'" . prettier-js-mode))))
+  (add-hook 'web-mode-hook #'(lambda ()
+                               (enable-minor-mode
+                                '("\\.tsx?\\'" . prettier-js-mode))))
+
+  ;; emmet
+  (use-package emmet-mode :straight t)
+  (add-hook 'css-mode-hook 'emmet-mode)
+  (add-hook 'scss-mode-hook 'emmet-mode)
+#+END_SRC
+
+** Python
+
+#+BEGIN_SRC emacs-lisp
+  (use-package elpy
+    :config
+    (elpy-enable))
+#+END_SRC
+
+** Docker
+
+#+BEGIN_SRC emacs-lisp
+  (use-package dockerfile-mode)
+#+END_SRC

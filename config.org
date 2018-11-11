@@ -607,6 +607,7 @@ Git god mod
   _j_ ↓           _x_ horizontal  _f_ind files   _da_ce
   _k_ ↑                         _s_wap         _dw_indow
   _l_ →                         _a_ce 1        _db_uffer
+                                               _o_ther
 
                   _D_lt Other     _S_ave
   _q_ cancel
@@ -633,16 +634,18 @@ Git god mod
     ("da" ace-delete-window)
     ("dw" delete-window)
     ("db" kill-this-buffer)
+    ("o" delete-other-windows)
     ("D" (lambda ()
            (interactive)
            (ace-window 16)
            (add-hook 'ace-window-end-once-hook
-                     'hydra-window/body)))
-     ("q" nil)
+                     'hydra-window/body))
      )
+    ("q" nil)
+    )
 
-    (general-define-key
-     "C-x C-w" '(hydra-window/body :which-key "window hydra"))
+  (general-define-key
+   "C-x C-w" '(hydra-window/body :which-key "window hydra"))
 #+END_SRC
 
 ** Flycheck

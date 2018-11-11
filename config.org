@@ -259,6 +259,34 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 
 #+BEGIN_SRC emacs-lisp
   (use-package ace-window)
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (defvar jake/help-temp-buffers '("^\\*Flycheck errors\\*$"
+                                   "^\\*Completions\\*$"
+                                   "^\\*GHC error\\*$"
+                                   "^\\*Help\\*$"
+                                   "^\\*HTTP Response\\*$"
+                                   "^\\*TeX Help\\*$"))
+
+  (while jake/help-temp-buffers
+    (add-to-list 'display-buffer-alist
+                 `(,(car jake/help-temp-buffers)
+                   (display-buffer-reuse-window
+                    display-buffer-below-selected)
+                   (reusable-frames     . visible)
+                   (side                        . bottom)
+                   (window-height               . 0.30)))
+    (setq jake/help-temp-buffers (cdr jake/help-temp-buffers)))
+
+  (add-to-list 'display-buffer-alist
+               `(,(rx bos "*compilation*" eos)
+                 (display-buffer-reuse-window
+                  display-buffer-below-selected)
+                 (reusable-frames . visible)
+                 (side            . bottom)
+                 (window-height   . 0.4)))
 #+END_SRC
 
 * Expand Region
@@ -686,6 +714,21 @@ Git god mod
 #+END_SRC
 
 * Languages
+** Spelling
+
+#+BEGIN_SRC emacs-lisp
+  (defun my-spellcheck-mode ()
+    (flyspell-mode))
+
+  (defun my-spellcheck-prog-mode ()
+    (flyspell-prog-mode))
+
+  (add-hook 'org-mode-hook 'my-spellcheck-mode)
+  (add-hook 'markdown-mode-hook 'my-spellcheck-mode)
+  (add-hook 'text-mode-hook 'my-spellcheck-mode)
+  (add-hook 'latex-mode-hook 'my-spellcheck-mode)
+#+END_SRC
+
 ** Syntax Checking
 
 #+BEGIN_SRC emacs-lisp
@@ -704,6 +747,23 @@ Git god mod
   (setq flycheck-display-errors-delay 0.3)
   (with-eval-after-load 'flycheck-inline
     (flycheck-inline-mode))
+#+END_SRC
+
+** Markdown
+
+#+BEGIN_SRC emacs-lisp
+  (use-package markdown-mode
+    :commands (markdown-mode gfm-mode)
+    :mode (("README\\.md\\'" . gfm-mode)
+           ("\\.md\\'" . markdown-mode)
+           ("\\.markdown\\'" . markdown-mode))
+    :init (setq markdown-command "multimarkdown"))
+#+END_SRC
+
+** Yaml
+
+#+BEGIN_SRC emacs-lisp
+  (use-package yaml-mode)
 #+END_SRC
 
 ** Rust
@@ -753,6 +813,21 @@ Git god mod
 #+BEGIN_SRC emacs-lisp
   (use-package elixir-mode)
   (use-package alchemist)
+#+END_SRC
+
+** Elm
+
+#+BEGIN_SRC emacs-lisp
+  (use-package f)
+  (use-package let-alist)
+  (use-package s)
+  (use-package dash)
+  (use-package elm-mode
+    :config
+    (setq elm-tags-on-save t)
+    (setq elm-sort-imports-on-save t)
+    (setq elm-format-on-save t)
+    (add-to-list 'company-backends 'company-elm))
 #+END_SRC
 
 ** JavaScript
@@ -939,4 +1014,25 @@ Use local version of eslint is available
 
 #+BEGIN_SRC emacs-lisp
   (use-package dockerfile-mode)
+#+END_SRC
+* Rest Client
+
+#+BEGIN_SRC emacs-lisp
+  (use-package restclient)
+#+END_SRC
+
+* Tramp
+
+#+BEGIN_SRC emacs-lisp
+  (setq tramp-default-method "ssh"
+        tramp-auto-save-directory "~/tmp/tramp"
+        tramp-chunksize 2000)
+#+END_SRC
+
+* Server
+
+So we can connect to emacs with ~emacsclient~
+
+#+BEGIN_SRC emacs-lisp
+  (server-start)
 #+END_SRC

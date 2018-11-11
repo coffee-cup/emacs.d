@@ -344,7 +344,7 @@ Git god mod
   (use-package git-gutter-fringe)
 
   (general-define-key
-   "C-x g" 'magit)
+   "C-x C-g" 'magit)
 #+END_SRC
 
 * Org Mode

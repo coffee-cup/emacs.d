@@ -247,6 +247,16 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     (global-emoify-mode))
 #+END_SRC
 
+* Applications
+
+#+BEGIN_SRC emacs-lisp
+  (general-define-key
+   "C-x C-a" '(:ignore t :which-key "apps")
+   "C-x C-a p" '(open-prodo :which-key "prodo")
+   "C-x C-a c" '(org-capture :which-key "capture")
+   "C-x C-a a" '(org-agenda-list :which-key "agenda"))
+#+END_SRC
+
 * Files
 
 #+BEGIN_SRC emacs-lisp
@@ -397,7 +407,7 @@ Git god mod
   (use-package git-gutter-fringe)
 
   (general-define-key
-   "C-x C-g" 'magit)
+   "C-x g" 'magit)
 #+END_SRC
 
 * Projects
@@ -516,6 +526,9 @@ Git god mod
 
 #+BEGIN_SRC emacs-lisp
   (use-package avy)
+
+  (general-define-key
+   "C-r" 'avy-goto-char-2)
 #+END_SRC
 
 * Ivy
@@ -555,6 +568,17 @@ Git god mod
    "C-s" 'swiper
    "M-x" 'counsel-M-x)
 
+#+END_SRC
+
+* Multiple Cursors
+
+#+BEGIN_SRC emacs-lisp
+  (use-package multiple-cursors
+    :config
+    (general-define-key
+     "C-c C-." 'mc/mark-next-like-this
+     "C-c C-," 'mc/mark-previous-like-this
+     "C-S-c C-S-c" 'mc/edit-lines))
 #+END_SRC
 
 * IMenu
@@ -648,6 +672,15 @@ Git god mod
     (global-undo-tree-mode))
 #+END_SRC
 
+* Copy/Paste
+
+#+BEGIN_SRC emacs-lisp
+  (use-package easy-kill
+    :config
+    (global-set-key [remap kill-ring-save] #'easy-kill)
+    (global-set-key [remap mark-sexp] #'easy-mark))
+#+END_SRC
+
 * Hydra
 
 #+BEGIN_SRC emacs-lisp
@@ -735,18 +768,28 @@ Git god mod
    "C-x f" '(hydra-flycheck/body :which-key "hydra flycheck"))
 #+END_SRC
 
-** Applications
+** Multiple Cursors
 
 #+BEGIN_SRC emacs-lisp
-  (defhydra hydra-applications ()
-    "Applications"
-    ("p"  open-prodo "Prodo" :exit t)
-    ("c" org-capture "Capture" :exit t)
-    ("a" org-agenda-list "Agenda" :exit t)
-    ("q"  nil))
+  (defhydra hydra-multiple-cursors (:hint nil)
+    "
+       ^Up^            ^Down^        ^Miscellaneous^
+  ----------------------------------------------
+  [_p_]   Next    [_n_]   Next    [_l_] Edit lines
+  [_P_]   Skip    [_N_]   Skip    [_a_] Mark all
+  [_M-p_] Unmark  [_M-n_] Unmark  [_q_] Quit"
+    ("l" mc/edit-lines :exit t)
+    ("a" mc/mark-all-like-this :exit t)
+    ("n" mc/mark-next-like-this)
+    ("N" mc/skip-to-next-like-this)
+    ("M-n" mc/unmark-next-like-this)
+    ("p" mc/mark-previous-like-this)
+    ("P" mc/skip-to-previous-like-this)
+    ("M-p" mc/unmark-previous-like-this)
+    ("q" nil))
 
   (general-define-key
-   "C-x C-a" '(hydra-applications/body :which-key "apps"))
+   "C-x m" '(hydra-multiple-cursors/body :which-key "hydra mc"))
 #+END_SRC
 
 * Languages

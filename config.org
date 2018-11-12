@@ -186,6 +186,20 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
   (add-hook 'markdown-mode-hook 'better-text-hook)
 #+END_SRC
 
+** Useful shortcuts
+
+#+BEGIN_SRC emacs-lisp
+  (defun open-todos ()
+    "Open TODO file."
+    (interactive)
+    (find-file "~/Dropbox/org/todos.org"))
+
+  (defun open-prodo ()
+    "Open TODO file."
+    (interactive)
+    (find-file "~/Dropbox/org/prodo.org"))
+#+END_SRC
+
 * Icons
 
 #+BEGIN_SRC emacs-lisp
@@ -201,7 +215,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 	doom-one-brighter-comments t
 	doom-dracula-brighter-comments t)
 
-  (load-theme 'doom-dracula t)
+  (load-theme 'doom-one t)
 #+END_SRC
 
 * Modeline
@@ -295,6 +309,8 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
   (use-package expand-region
     :config
     (setq delete-selection-mode t))
+
+  (delete-selection-mode)
 
   (general-define-key
    "C-=" 'er/expand-region)
@@ -391,6 +407,12 @@ Git god mod
   (use-package counsel-projectile)
   (projectile-mode)
   (counsel-projectile-mode)
+
+  (general-define-key
+   "C-x p" '(:ignore t :which-key "projects")
+   "C-x p l" '(counsel-projectile-switch-project :which-key "switch project")
+   "C-x p g" '(counsel-projectile-grep :which-key "grep project")
+   "C-x p f" '(counsel-projectile-find-file :which-key "find file"))
 #+END_SRC
 
 * Org Mode
@@ -713,6 +735,20 @@ Git god mod
    "C-x f" '(hydra-flycheck/body :which-key "hydra flycheck"))
 #+END_SRC
 
+** Applications
+
+#+BEGIN_SRC emacs-lisp
+  (defhydra hydra-applications ()
+    "Applications"
+    ("p"  open-prodo "Prodo" :exit t)
+    ("c" org-capture "Capture" :exit t)
+    ("a" org-agenda-list "Agenda" :exit t)
+    ("q"  nil))
+
+  (general-define-key
+   "C-x C-a" '(hydra-applications/body :which-key "apps"))
+#+END_SRC
+
 * Languages
 ** Spelling
 
@@ -731,6 +767,8 @@ Git god mod
 
 ** Syntax Checking
 
+Flycheck
+
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck
     :init (global-flycheck-mode))
@@ -747,6 +785,14 @@ Git god mod
   (setq flycheck-display-errors-delay 0.3)
   (with-eval-after-load 'flycheck-inline
     (flycheck-inline-mode))
+#+END_SRC
+
+Keybindings
+
+#+BEGIN_SRC emacs-lisp
+  (general-define-key
+   "C-," 'flycheck-previous-error
+   "C-." 'flycheck-next-error)
 #+END_SRC
 
 ** Markdown

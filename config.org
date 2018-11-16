@@ -286,7 +286,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
 
   (general-define-key
-   "C-x w" 'ace-window)
+   "C-x o" 'ace-window)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -316,7 +316,8 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
                  (window-height   . 0.4)))
 #+END_SRC
 
-* Expand Region
+* Editing
+** Expand Region
 
 #+BEGIN_SRC emacs-lisp
   (use-package expand-region
@@ -329,7 +330,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
    "C-=" 'er/expand-region)
 #+END_SRC
 
-* Parens
+** Parens
 
 #+BEGIN_SRC emacs-lisp
   (show-paren-mode 1)
@@ -354,6 +355,54 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
   (setq sp-highlight-pair-overlay nil)
 
   (add-hook 'prog-mode #'smartparens-mode)
+#+END_SRC
+
+Vim like % emulation
+
+#+BEGIN_SRC emacs-lisp
+  (defun goto-match-paren (arg)
+    "Go to the matching parenthesis if on parenthesis, otherwise insert %.
+  vi style of % jumping to matching brace."
+    (interactive "p")
+    (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
+          ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
+          (t (self-insert-command (or arg 1)))))
+
+  (general-define-key
+   "%" 'goto-match-paren)
+#+END_SRC
+
+** Commenting
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-nerd-commenter)
+
+  (general-define-key
+   "C-;" 'evilnc-comment-or-uncomment-lines)
+#+END_SRC
+
+** Copy/Paste
+
+#+BEGIN_SRC emacs-lisp
+  (use-package easy-kill
+    :config
+    (global-set-key [remap kill-ring-save] #'easy-kill)
+    (global-set-key [remap mark-sexp] #'easy-mark))
+#+END_SRC
+
+** Select entire line
+
+#+BEGIN_SRC emacs-lisp
+  (defun select-entire-line ()
+    "Select the entire line at point"
+    (interactive)
+    (move-beginning-of-line nil)
+    (set-mark-command nil)
+    (move-end-of-line nil)
+    )
+
+  (general-define-key
+   "C-v" 'select-entire-line)
 #+END_SRC
 
 * Indentation and Buffer Cleanup
@@ -460,7 +509,8 @@ Git god mod
   (general-define-key
    :keymaps 'org-mode-map
    "C-c t" 'org-time-stamp-inactive
-   "C-c r" 'org-set-tags)
+   "C-c r" 'org-set-tags
+   "C-c g" 'org-update-statistics-cookies)
 #+END_SRC
 
 ** Agenda
@@ -603,7 +653,11 @@ Git god mod
 #+BEGIN_SRC emacs-lisp
   (use-package imenu-list
     :config
-    (setq imenu-list-auto-resize t))
+    (setq imenu-list-auto-resize t
+          imenu-list-focus-after-activation t))
+
+  (general-define-key
+   "C-'" 'imenu-list-smart-toggle)
 #+END_SRC
 
 * Dash Docs
@@ -680,7 +734,7 @@ Git god mod
               (neotree-find file-name))))))
 
   (general-define-key
-   "C-x t" '(neotree-project-dir-toggle :which-key "neotree"))
+   "C-x t" '(neotree :which-key "neotree"))
 #+END_SRC
 
 * Undo Tree
@@ -689,15 +743,6 @@ Git god mod
   (use-package undo-tree
     :config
     (global-undo-tree-mode))
-#+END_SRC
-
-* Copy/Paste
-
-#+BEGIN_SRC emacs-lisp
-  (use-package easy-kill
-    :config
-    (global-set-key [remap kill-ring-save] #'easy-kill)
-    (global-set-key [remap mark-sexp] #'easy-mark))
 #+END_SRC
 
 * Hydra
@@ -1154,6 +1199,10 @@ Use local version of eslint is available
   ;; formats the buffer before saving
   ; (add-hook 'before-save-hook 'tide-format-before-save)
   (add-hook 'typescript-mode-hook #'setup-tide-mode)
+
+  (general-define-key
+   :keymaps '(typescript-mode-map web-mode-map)
+   "C-c r" 'tide-rename-symbol)
 #+END_SRC
 
 ** Web

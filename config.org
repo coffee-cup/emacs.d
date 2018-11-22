@@ -735,12 +735,7 @@ Git god mod
   (setq org-agenda-files (list "~/Dropbox/org/todos.org"
                                "~/Dropbox/org/assignments.org"
                                "~/Dropbox/org/notes.org"
-                               "~/Dropbox/org/school.org"
-                               "~/Dropbox/org/projects.org"
-                               "~/Dropbox/org/home.org"
                                "~/Dropbox/org/mobile.org"
-                               "~/Dropbox/org/scratch.org"
-                               "~/Dropbox/org/scratch.org"
                                "~/Dropbox/org/prodo.org"
                                ))
 #+END_SRC

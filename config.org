@@ -81,14 +81,6 @@ change the code in the packages.
   (add-hook 'prog-mode-hook 'linum-mode)
 #+END_SRC
 
-* Cursor
-
-#+BEGIN_SRC emacs-lisp
-  (blink-cursor-mode 0)
-  (setq-default cursor-type 'box)
-  (set-cursor-color "#e98de9")
-#+END_SRC
-
 * Keybindings
 
 Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bindings. [[https://github.com/justbur/emacs-which-key][which-key]] for displaying next possible bindings.
@@ -211,7 +203,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     "av"  '(org-brain-visualize :which-key "brain"))
 #+END_SRC
 
-* Evilk
+* Evil
 ** Configuration
 
 #+BEGIN_SRC emacs-lisp
@@ -453,6 +445,14 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 	doom-dracula-brighter-comments t)
 
   (load-theme 'doom-one t)
+#+END_SRC
+
+* Cursor
+
+#+BEGIN_SRC emacs-lisp
+  (blink-cursor-mode 0)
+  (setq-default cursor-type 'box)
+  (set-cursor-color "#e98de9")
 #+END_SRC
 
 * Modeline

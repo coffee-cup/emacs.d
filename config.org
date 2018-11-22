@@ -79,9 +79,14 @@ change the code in the packages.
 
   ;; lines numbers in programming mode
   (add-hook 'prog-mode-hook 'linum-mode)
+#+END_SRC
 
+* Cursor
+
+#+BEGIN_SRC emacs-lisp
   (blink-cursor-mode 0)
   (setq-default cursor-type 'box)
+  (set-cursor-color "#e98de9")
 #+END_SRC
 
 * Keybindings
@@ -96,7 +101,229 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
   (use-package general)
 #+END_SRC
 
+* Space Bindings
+
+#+BEGIN_SRC emacs-lisp
+  (defconst my-leader "SPC")
+  (defconst my-local-leader ",")
+
+  (general-create-definer my-leader-def
+    :prefix my-leader)
+
+  (general-create-definer my-local-leader-def
+    :prefix my-local-leader)
+
+  (my-leader-def
+    :states '(normal visual insert emacs)
+    :non-normal-prefix "C-SPC"
+
+    ;; simple commands
+    "'"   '(iterm-focus :which-key "iterm")
+    "?"   '(iterm-goto-filedir-or-home :which-key "iterm dir")
+    "/"   'counsel-ag
+    "TAB" '(switch-to-previous-buffer :which-key "prev buffer")
+    "SPC" '(counsel-M-x :which-key "M-x")
+    "h"   '(counsel-descbinds :which-key "describe bindings")
+    "c"   '(avy-goto-char-2 :which-key "avy-timer")
+    "m"   '(recenter :which-key "recenter")
+    "i"   '(imenu :which-key "imenu")
+
+    ;; files
+    "f"  '(:ignore t :which-key "files")
+    "ff" '(counsel-find-file :which-key "find file")
+    "fr" '(counsel-recentf :which-key "recent files")
+    "fs" '(save-buffer :which-key "save file")
+
+    ;; projects
+    "p"  '(:ignore t :which-key "projects")
+    "pf" '(counsel-projectile-find-file :which-key "find file")
+    "pl" '(counsel-projectile-switch-project :which-key "switch project")
+    "pg" '(counsel-projectile-grep :which-key "search project")
+
+    ;; buffers
+    "b"  '(:ignore t :which-key "buffers")
+    "bb"  '(ivy-switch-buffer :which-key "switch buffers")
+    "bd" '(kill-current-buffer :which-key "kill current buffer")
+    "bD" '(kill-buffers :which-key "kill-buffers")
+
+    ;; windows
+    "w"  '(:ignore t :which-key "windows")
+    "wd" '(delete-window :which-key "delete window")
+    "wl" '(windmove-right :which-key "right window")
+    "wh" '(windmove-left :which-key "left window")
+    "wj" '(windmove-down :which-key "down window")
+    "wk" '(windmove-up :which-key "up window")
+    "w/" '(split-window-horizontally :which-key "split horizontally")
+    "w-" '(split-window-vertically :which-key "split vertically")
+    "wb" '(balance-windows :which-key "balance")
+
+    ;; sidebar
+    "t" '(treemacs :which-key "sidebar")
+
+    ;; errors
+    "e"  '(:ignore t :which-key "errors")
+    "ef" '(flycheck-first-error :which-key "first error")
+    "el" '(flycheck-list-errors-toggle :which-key "list errors")
+    "en" '(flycheck-next-error :which-key "next error")
+    "ep" '(flycheck-previous-error :which-key "prev error")
+    "ev" '(flycheck-verify-setup :which-key "verify setup")
+    "es" '(flycheck-select-checker :which-key "select checker")
+    "ec" '(flycheck-clear :which-key "clear")
+    "eb" '(flycheck-buffer :which-key "check buffer")
+
+    ;; git
+    "g"  '(:ignore t :which-key "git")
+    "gs" '(magit-status :which-key "status")
+    "gl" '(:ignore t :which-key "logs")
+    "gll" '(magit-log-head :which-key "head")
+    "glb" '(magit-log-branches :which-key "branches")
+
+    ;; ring buffer
+    "r"  '(:ignore t :which-key "ring buffer")
+    "ry" '(counsel-yank-pop :which-key "search history")
+
+    ;; jumping to registers
+    "j"  '(:ignore t :which-key "jumping")
+    "js" '(point-to-register :which-key "set register")
+    "jk" '(point-to-garbage-register :which-key "set garbage")
+    "jg" '(jump-to-register :which-key "jump to register")
+
+    ;; shell
+    "s"  '(:ignore t :which-key "shell")
+    "sn" '(multi-term :which-key "new shell")
+    "sr" '(rename-term :which-key "rename shell")
+    "sd" '(my-multi-term-open-or-switch-dedicated :which-key "dedicated")
+    "ss" '(get-term :which-key "last term")
+
+    ;; dash docs
+    "d"  '(:ignore t :which-key "dash")
+    "dd" '(dash-at-point :which-key "dash at point")
+    "de" '(dash-at-point-with-docset :which-key "at point w/docset")
+
+    ;; Applications
+    "a"   '(:ignore t :which-key "applications")
+    "at"  '(org-todo-list :which-key "todos")
+    "ad"  '(dired :which-key "dired")
+    "ac"  '(calendar :which-key "calendar")
+    "ao"  '(:ignore t :which-key "org")
+    "aol" '(org-agenda-list :which-key "list")
+    "aoc" '(org-capture :which-key "capture")
+    "av"  '(org-brain-visualize :which-key "brain"))
+#+END_SRC
+
+* Evilk
+** Configuration
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    :config
+    (evil-mode 1))
+
+  (use-package evil-collection
+    :after evil
+    :config
+    (evil-collection-init))
+  (setq evil-collection-company-use-tng nil)
+#+END_SRC
+
+** Keybindings
+
+#+BEGIN_SRC emacs-lisp
+  (general-define-key
+   :states 'normal
+   "gc" 'evilnc-comment-or-uncomment-lines)
+
+  (general-define-key
+   :states 'insert
+   :keymaps 'global-map
+   "C-h" 'evil-backward-char
+   "C-l" 'evil-forward-char
+   "C-j" 'evil-next-line
+   "C-k" 'evil-previous-line
+   "C-g" 'evil-force-normal-state
+   "C-[" 'evil-force-normal-state)
+#+END_SRC
+
+** Surround
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-surround
+    :config
+    (global-evil-surround-mode 1))
+#+END_SRC
+
+* God Mode
+
+# #+BEGIN_SRC emacs-lisp
+#   (use-package god-mode
+#     :config
+#     (setq god-exempt-major-modes nil
+#           god-exempt-predicates nil)
+#     (which-key-enable-god-mode-support))
+
+#   (general-define-key
+#    "C-q" 'god-mode-all)
+
+#   (general-define-key
+#    :keymaps 'god-local-mode-map
+#    "i" 'god-mode-mode
+#    "z" 'repeat)
+
+#   (add-to-list 'god-exempt-major-modes 'dired-mode)
+# #+END_SRC
+
+# ** Interface Changes
+
+# #+BEGIN_SRC emacs-lisp
+#   (setq mode-line-insert "#1D2026"
+#         mode-line-normal "#0a2832")
+
+#   ;; Cursor
+#   (defun god-update-cursor ()
+#     (setq cursor-type (if (or god-local-mode buffer-read-only)
+#                           'box
+#                         'bar)))
+
+#   (add-hook 'god-mode-enabled-hook 'god-update-cursor)
+#   (add-hook 'god-mode-disabled-hook 'god-update-cursor)
+
+#   ;; Modeline
+#   (defun c/god-mode-update-cursor ()
+#     (let ((limited-colors-p (> 257 (length (defined-colors)))))
+#       (cond (god-local-mode (progn
+#                               (set-face-background 'mode-line (if limited-colors-p "white" mode-line-normal))
+#                               (set-face-background 'mode-line-inactive (if limited-colors-p "white" mode-line-normal))))
+#             (t (progn
+#                  (set-face-background 'mode-line (if limited-colors-p "black" mode-line-insert))
+#                  (set-face-background 'mode-line-inactive (if limited-colors-p "black" mode-line-insert)))))))
+
+#   (add-hook 'god-mode-enabled-hook 'c/god-mode-update-cursor)
+#   (add-hook 'god-mode-disabled-hook 'c/god-mode-update-cursor)
+# #+END_SRC
+
+# ** Org Speed Keys
+
+# #+BEGIN_SRC emacs-lisp
+#   (define-key god-local-mode-map [remap self-insert-command] 'my-god-mode-self-insert)
+
+#   (defun my-god-mode-self-insert ()
+#     (interactive)
+#     (if (and (bolp)
+#              (eq major-mode 'org-mode))
+#         (call-interactively 'org-self-insert-command)
+#       (call-interactively 'god-mode-self-insert)))
+# #+END_SRC
+
 * Misc
+** Speedup
+
+#+BEGIN_SRC emacs-lisp
+  (setq load-prefer-newer t)
+#+END_SRC
+
 ** Bars
 
 #+BEGIN_SRC emacs-lisp
@@ -198,6 +425,16 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     "Open TODO file."
     (interactive)
     (find-file "~/Dropbox/org/prodo.org"))
+#+END_SRC
+
+** Jump to garbage
+
+#+BEGIN_SRC emacs-lisp
+  (defun point-to-garbage-register ()
+    "jump to garbage register"
+    (interactive)
+    (point-to-register "k")
+    )
 #+END_SRC
 
 * Icons
@@ -345,16 +582,18 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 
   (use-package rainbow-delimiters :straight t)
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode-enable)
-  ;; (electric-pair-mode t)
+  (electric-pair-mode t)
 
   (use-package smartparens)
+  (use-package evil-smartparens)
 
   (require 'smartparens-config)
-  (smartparens-global-mode)
+  ;; (smartparens-global-mode)
   (show-smartparens-global-mode t)
   (setq sp-highlight-pair-overlay nil)
 
   (add-hook 'prog-mode #'smartparens-mode)
+  (add-hook 'smartparens-enabled-hook #'evil-smartparens-mode)
 #+END_SRC
 
 Vim like % emulation
@@ -449,6 +688,26 @@ Vim like % emulation
    :keymaps 'dired-mode-map
    "<tab>" #'dired-subtree-cycle
    "<backtab>" #'dired-subtree-cycle)
+
+  (eval-after-load 'dired
+    '(progn
+       ;; use the standard Dired bindings as base
+       (evil-make-overriding-map dired-mode-map 'normal t)
+       (general-define-key
+        :states '(normal)
+        :keymaps 'dired-mode-map
+        "h" 'evil-backward-char
+        "j" 'evil-next-line
+        "k" 'evil-previous-line
+        "l" 'evil-forward-char
+        "J" 'dired-goto-file
+        "K" 'dired-do-kill-lines
+        "r" 'revert-buffer
+        "DEL" 'dired-up-directory
+        "<tab>" #'dired-subtree-toggle
+        "<backtab>" #'dired-subtree-cycle)))
+
+  (setq dired-auto-revert-buffer t)
 #+END_SRC
 
 * Git
@@ -457,6 +716,7 @@ Git god mod
 
 #+BEGIN_SRC emacs-lisp
   (use-package magit)
+  (use-package evil-magit)
 
   (use-package git-gutter
     :config
@@ -483,6 +743,21 @@ Git god mod
 #+END_SRC
 
 * Org Mode
+** Evil Org
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-org
+    :straight t
+    :after org
+    :config
+    (add-hook 'org-mode-hook 'evil-org-mode)
+    (add-hook 'evil-org-mode-hook
+              (lambda ()
+                (evil-org-set-key-theme)))
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
+#+END_SRC
+
 ** Speed keys
 
 #+BEGIN_SRC emacs-lisp
@@ -501,6 +776,7 @@ Git god mod
     (flycheck-mode -1))
 
   (add-hook 'org-src-mode-hook 'disable-fylcheck-in-org-src-block)
+  (setq evil-org-key-theme '(textobjects navigation additional insert todo))
 #+END_SRC
 
 ** Keybindings
@@ -609,22 +885,31 @@ Git god mod
 ** Ivy/Counsel/Swiper
 
 #+BEGIN_SRC emacs-lisp
-  (use-package ivy
-    :diminish (ivy-mode . "")
-    :init
-    (ivy-mode 1)
-    :bind (:map ivy-minibuffer-map
-                ("RET" . ivy-alt-done))
-    :config
-    (setq ivy-use-virtual-buffers t
-          ivy-height 20
-          ivy-count-format "(%d/%d) "
-          ivy-display-style 'fancy
-          ivy-format-function 'ivy-format-function-line
-          ivy-initial-inputs-alist nil
-          ivy-re-builders-alist '((swiper . ivy--regex-plus)
-                                  (t . ivy--regex-fuzzy))
-          avy-timeout-seconds 0.4))
+  (use-package ivy :straight t
+      :diminish (ivy-mode . "")             ; does not display ivy in the modeline
+      :init
+      (ivy-mode 1)                          ; enable ivy globally at startup
+      :bind (:map ivy-minibuffer-map        ; bind in the ivy buffer
+          ("RET" . ivy-alt-done)
+          ("C-j" . ivy-next-line)
+          ("C-k" . ivy-previous-line)
+          ("C-h" . ivy-backward-delete-char)
+          ("s-<"  . ivy-avy)
+          ("s->"  . ivy-dispatching-done)
+          ("s-+" . ivy-call)
+          ("s-!" . ivy-immediate-done)
+          ("s-[" . ivy-previous-history-element)
+          ("s-]" . ivy-next-history-element))
+      :config
+      (setq ivy-use-virtual-buffers t)       ; extend searching to bookmarks and
+      (setq ivy-height 20)                   ; set height of the ivy window
+      (setq ivy-count-format "(%d/%d) ")     ; count format, from the ivy help page
+      (setq ivy-display-style 'fancy)
+      (setq ivy-format-function 'ivy-format-function-line)
+      (setq ivy-initial-inputs-alist nil))
+      (setq ivy-re-builders-alist
+            '((swiper            . ivy--regex-plus)
+              (t                 . ivy--regex-fuzzy)))
 
   (use-package swiper)
   (use-package counsel
@@ -634,7 +919,6 @@ Git god mod
   (general-define-key
    "C-s" 'swiper
    "M-x" 'counsel-M-x)
-
 #+END_SRC
 
 * Multiple Cursors
@@ -645,7 +929,8 @@ Git god mod
     (general-define-key
      "C-c C-." 'mc/mark-next-like-this
      "C-c C-," 'mc/mark-previous-like-this
-     "C-S-c C-S-c" 'mc/edit-lines))
+     "s-d" 'mc/mark-next-like-this-word
+     "C-c C-a" 'mc/edit-lines))
 #+END_SRC
 
 * IMenu
@@ -701,6 +986,11 @@ Git god mod
   (use-package company-quickhelp
     :config
     (company-quickhelp-mode))
+
+  (general-define-key
+   :keymaps '(company-active-map company-search-map)
+   "C-n" 'company-select-next
+   "C-p" 'company-select-previous)
 #+END_SRC
 
 * Tree
@@ -735,6 +1025,10 @@ Git god mod
 
   (general-define-key
    "C-x t" '(neotree :which-key "neotree"))
+
+  (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-enter)
+  (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
+  (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-enter)
 #+END_SRC
 
 * Undo Tree
@@ -743,6 +1037,16 @@ Git god mod
   (use-package undo-tree
     :config
     (global-undo-tree-mode))
+#+END_SRC
+
+* Key Chords
+
+#+BEGIN_SRC emacs-lisp
+  (use-package key-chord
+    :config
+    ;; (key-chord-mode +1)
+    (setq key-chord-two-keys-delay 0.015
+          key-chord-one-key-delay 0.020))
 #+END_SRC
 
 * Hydra
@@ -1232,6 +1536,8 @@ Use local version of eslint is available
   (use-package emmet-mode :straight t)
   (add-hook 'css-mode-hook 'emmet-mode)
   (add-hook 'scss-mode-hook 'emmet-mode)
+  (with-eval-after-load 'evil-maps
+    (define-key evil-insert-state-map (kbd "C-p") 'emmet-expand-line))
 #+END_SRC
 
 ** Python

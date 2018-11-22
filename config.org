@@ -247,68 +247,6 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     (global-evil-surround-mode 1))
 #+END_SRC
 
-* God Mode
-
-# #+BEGIN_SRC emacs-lisp
-#   (use-package god-mode
-#     :config
-#     (setq god-exempt-major-modes nil
-#           god-exempt-predicates nil)
-#     (which-key-enable-god-mode-support))
-
-#   (general-define-key
-#    "C-q" 'god-mode-all)
-
-#   (general-define-key
-#    :keymaps 'god-local-mode-map
-#    "i" 'god-mode-mode
-#    "z" 'repeat)
-
-#   (add-to-list 'god-exempt-major-modes 'dired-mode)
-# #+END_SRC
-
-# ** Interface Changes
-
-# #+BEGIN_SRC emacs-lisp
-#   (setq mode-line-insert "#1D2026"
-#         mode-line-normal "#0a2832")
-
-#   ;; Cursor
-#   (defun god-update-cursor ()
-#     (setq cursor-type (if (or god-local-mode buffer-read-only)
-#                           'box
-#                         'bar)))
-
-#   (add-hook 'god-mode-enabled-hook 'god-update-cursor)
-#   (add-hook 'god-mode-disabled-hook 'god-update-cursor)
-
-#   ;; Modeline
-#   (defun c/god-mode-update-cursor ()
-#     (let ((limited-colors-p (> 257 (length (defined-colors)))))
-#       (cond (god-local-mode (progn
-#                               (set-face-background 'mode-line (if limited-colors-p "white" mode-line-normal))
-#                               (set-face-background 'mode-line-inactive (if limited-colors-p "white" mode-line-normal))))
-#             (t (progn
-#                  (set-face-background 'mode-line (if limited-colors-p "black" mode-line-insert))
-#                  (set-face-background 'mode-line-inactive (if limited-colors-p "black" mode-line-insert)))))))
-
-#   (add-hook 'god-mode-enabled-hook 'c/god-mode-update-cursor)
-#   (add-hook 'god-mode-disabled-hook 'c/god-mode-update-cursor)
-# #+END_SRC
-
-# ** Org Speed Keys
-
-# #+BEGIN_SRC emacs-lisp
-#   (define-key god-local-mode-map [remap self-insert-command] 'my-god-mode-self-insert)
-
-#   (defun my-god-mode-self-insert ()
-#     (interactive)
-#     (if (and (bolp)
-#              (eq major-mode 'org-mode))
-#         (call-interactively 'org-self-insert-command)
-#       (call-interactively 'god-mode-self-insert)))
-# #+END_SRC
-
 * Misc
 ** Speedup
 

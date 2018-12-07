@@ -19,7 +19,7 @@ Bootstrap use-package
   (require 'package)
   (setq package-enable-at-startup nil)
   (add-to-list 'package-archives
-	       '("melpa" . "https://melpa.org/packages/"))
+               '("melpa" . "https://melpa.org/packages/"))
 
   (package-initialize)
 
@@ -40,14 +40,14 @@ change the code in the packages.
 #+BEGIN_SRC emacs-lisp
   ; Load straight.el package manager
   (let ((bootstrap-file (concat user-emacs-directory "straight/repos/straight.el/bootstrap.el"))
-	(bootstrap-version 3))
+        (bootstrap-version 3))
     (unless (file-exists-p bootstrap-file)
       (with-current-buffer
-	  (url-retrieve-synchronously
-	   "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	   'silent 'inhibit-cookies)
-	(goto-char (point-max))
-	(eval-print-last-sexp)))
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
     (load bootstrap-file nil 'nomessage))
 
   ; use-package straight.el integration
@@ -67,6 +67,7 @@ change the code in the packages.
                                           "~/.emacs.d/auto-save-list/" t)) ; transform backups file name
         inhibit-startup-screen t                                           ; inhibit useless and old-school startup screen
         ring-bell-function 'ignore                                         ; silent bell
+        frame-title-format  "%b"
         coding-system-for-read 'utf-8                                      ; utf-8
         coding-system-for-write 'utf-8
         sentence-end-double-space nil                                      ; sentence should end with only a point
@@ -79,6 +80,9 @@ change the code in the packages.
 
   ;; lines numbers in programming mode
   (add-hook 'prog-mode-hook 'linum-mode)
+
+  ;; line highlighting
+  (global-hl-line-mode)
 #+END_SRC
 
 * Keybindings
@@ -116,7 +120,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     "TAB" '(switch-to-previous-buffer :which-key "prev buffer")
     "SPC" '(counsel-M-x :which-key "M-x")
     "h"   '(counsel-descbinds :which-key "describe bindings")
-    "c"   '(avy-goto-char-2 :which-key "avy-timer")
+    "c"   '(avy-goto-word-1 :which-key "avy-timer")
     "m"   '(recenter :which-key "recenter")
     "i"   '(imenu :which-key "imenu")
 
@@ -130,7 +134,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     "p"  '(:ignore t :which-key "projects")
     "pf" '(counsel-projectile-find-file :which-key "find file")
     "pl" '(counsel-projectile-switch-project :which-key "switch project")
-    "pg" '(counsel-projectile-grep :which-key "search project")
+    "pg" '(counsel-projectile-ag :which-key "search project")
 
     ;; buffers
     "b"  '(:ignore t :which-key "buffers")
@@ -140,6 +144,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 
     ;; windows
     "w"  '(:ignore t :which-key "windows")
+    "wa" '(ace-window :which-key "ace")
     "wd" '(delete-window :which-key "delete window")
     "wl" '(windmove-right :which-key "right window")
     "wh" '(windmove-left :which-key "left window")
@@ -229,7 +234,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
    "gc" 'evilnc-comment-or-uncomment-lines)
 
   (general-define-key
-   :states 'insert
+   :states '(insert replace)
    :keymaps 'global-map
    "C-h" 'evil-backward-char
    "C-l" 'evil-forward-char
@@ -319,7 +324,6 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
   (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
   (add-to-list 'default-frame-alist '(ns-appearance . dark))
   (setq ns-use-proxy-icon  nil)
-  (setq frame-title-format nil)
 #+END_SRC
 
 ** Auto fill
@@ -378,9 +382,9 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 #+BEGIN_SRC emacs-lisp
   (use-package doom-themes)
   (setq doom-themes-enable-bold t
-	doom-themes-enable-italic t
-	doom-one-brighter-comments t
-	doom-dracula-brighter-comments t)
+        doom-themes-enable-italic t
+        doom-one-brighter-comments t
+        doom-dracula-brighter-comments t)
 
   (load-theme 'doom-one t)
 #+END_SRC
@@ -408,9 +412,9 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 
 #+BEGIN_SRC emacs-lisp
   (set-face-attribute 'default nil
-		      :family "Source Code Pro"
-		      :height 150
-		      :weight 'normal)
+                      :family "Source Code Pro"
+                      :height 150
+                      :weight 'normal)
 #+END_SRC
 
 * Emojis
@@ -582,6 +586,18 @@ Vim like % emulation
    "C-v" 'select-entire-line)
 #+END_SRC
 
+** Move Text
+
+#+BEGIN_SRC emacs-lisp
+  (use-package move-text)
+  (use-package drag-stuff)
+
+  (general-define-key
+   :states 'visual
+   "C-j" 'drag-stuff-down
+   "C-k" 'drag-stuff-up)
+#+END_SRC
+
 * Indentation and Buffer Cleanup
 
 #+BEGIN_SRC emacs-lisp
@@ -724,7 +740,8 @@ Git god mod
    :keymaps 'org-mode-map
    "C-c t" 'org-time-stamp-inactive
    "C-c r" 'org-set-tags
-   "C-c g" 'org-update-statistics-cookies)
+   "C-c g" 'org-update-statistics-cookies
+   "C-c a" 'org-archive-subtree)
 #+END_SRC
 
 ** Agenda
@@ -802,9 +819,6 @@ Git god mod
 
 #+BEGIN_SRC emacs-lisp
   (use-package avy)
-
-  (general-define-key
-   "C-r" 'avy-goto-char-2)
 #+END_SRC
 
 * Ivy
@@ -874,8 +888,10 @@ Git god mod
     (setq imenu-list-auto-resize t
           imenu-list-focus-after-activation t))
 
+  (use-package imenu-anywhere)
+
   (general-define-key
-   "C-'" 'imenu-list-smart-toggle)
+   "C-'" 'imenu-anywhere)
 #+END_SRC
 
 * Dash Docs
@@ -1234,15 +1250,24 @@ Keybindings
 ** Rust
 
 #+BEGIN_SRC emacs-lisp
+  (use-package rust-mode)
+
   (use-package racer
-    :config
-    (general-define-key rust-mode-map
-                        "TAB" 'company-indent-or-complete-common)
-    (setq company-tooltip-align-annotations t
-          rust-format-on-save t)
     :hook ((rust-mode . racer-mode)
            (racer-mode . eldoc-mode)
            (racer-mode . company-mode)))
+
+
+  (general-define-key
+   :keymaps 'rust-mode-map
+   "TAB" 'company-indent-or-complete-common)
+
+  (setq company-tooltip-align-annotations t
+        rust-format-on-save t)
+
+  (use-package flycheck-rust)
+  (with-eval-after-load 'rust-mode
+    (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 #+END_SRC
 
 ** Go
@@ -1439,7 +1464,9 @@ Use local version of eslint is available
 
   (general-define-key
    :keymaps '(typescript-mode-map web-mode-map)
-   "C-c r" 'tide-rename-symbol)
+   "C-c r" 'tide-rename-symbol
+   :states 'motion
+   "g d" 'tide-jump-to-definition)
 #+END_SRC
 
 ** Web

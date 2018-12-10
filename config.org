@@ -973,7 +973,7 @@ Git god mod
               (neotree-find file-name))))))
 
   (general-define-key
-   "C-x t" '(neotree :which-key "neotree"))
+   "C-x t" '(neotree-project-dir-toggle :which-key "neotree"))
 
   (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-enter)
   (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
@@ -1184,6 +1184,14 @@ Git god mod
    "C-M-s" 'hydra-smartparens/body)
 #+END_SRC
 
+* Key Frequency
+
+#+BEGIN_SRC emacs-lisp
+  (use-package keyfreq)
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1)
+#+END_SRC
+
 * Languages
 ** Spelling
 
@@ -1198,6 +1206,9 @@ Git god mod
   (add-hook 'markdown-mode-hook 'my-spellcheck-mode)
   (add-hook 'text-mode-hook 'my-spellcheck-mode)
   (add-hook 'latex-mode-hook 'my-spellcheck-mode)
+
+  (general-define-key
+   "C-c s" 'flyspell-auto-correct-word)
 #+END_SRC
 
 ** Syntax Checking

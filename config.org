@@ -120,9 +120,11 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     "TAB" '(switch-to-previous-buffer :which-key "prev buffer")
     "SPC" '(counsel-M-x :which-key "M-x")
     "h"   '(counsel-descbinds :which-key "describe bindings")
-    "c"   '(avy-goto-word-1 :which-key "avy-timer")
     "m"   '(recenter :which-key "recenter")
     "i"   '(imenu :which-key "imenu")
+
+    ;; avy
+    "c" '(avy-goto-word-1 :which-key "word")
 
     ;; files
     "f"  '(:ignore t :which-key "files")
@@ -203,7 +205,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     "ad"  '(dired :which-key "dired")
     "ac"  '(calendar :which-key "calendar")
     "ao"  '(:ignore t :which-key "org")
-    "aol" '(org-agenda-list :which-key "list")
+    "aol" '(org-agenda-show-agenda-and-todo :which-key "list")
     "aoc" '(org-capture :which-key "capture")
     "av"  '(org-brain-visualize :which-key "brain"))
 #+END_SRC
@@ -415,6 +417,8 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
                       :family "Source Code Pro"
                       :height 150
                       :weight 'normal)
+
+  (global-prettify-symbols-mode +1)
 #+END_SRC
 
 * Emojis
@@ -517,10 +521,10 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
   (setq show-paren-delay 0)
   (setq show-paren-when-point-inside-paren t)
 
-  (with-eval-after-load 'paren
-    (set-face-background 'show-paren-match "#555555")
-    (set-face-foreground 'show-paren-match "#def")
-    (set-face-attribute 'show-paren-match nil :weight 'extra-bold))
+  ;; (with-eval-after-load 'paren
+  ;;   (set-face-background 'show-paren-match "#555555")
+  ;;   (set-face-foreground 'show-paren-match "#def")
+  ;;   (set-face-attribute 'show-paren-match nil :weight 'extra-bold))
 
   (use-package rainbow-delimiters :straight t)
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode-enable)
@@ -744,6 +748,12 @@ Git god mod
    "C-c a" 'org-archive-subtree)
 #+END_SRC
 
+** Log Done
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-log-done t)
+#+END_SRC
+
 ** Agenda
 
 #+BEGIN_SRC emacs-lisp
@@ -755,6 +765,10 @@ Git god mod
                                "~/Dropbox/org/mobile.org"
                                "~/Dropbox/org/prodo.org"
                                ))
+
+  (defun org-agenda-show-agenda-and-todo (&optional arg)
+    (interactive "P")
+    (org-agenda arg "n"))
 #+END_SRC
 
 ** Capture
@@ -768,11 +782,6 @@ Git god mod
                  '("t" "Todo" entry
                    (file+headline "~/Dropbox/org/todos.org" "Todos")
                    "* TODO %^{What Do}\n SCHEDULED: %^{Scheduled}t\n"
-                   :empty-lines-after 1))
-    (add-to-list 'org-capture-templates
-                 '("p" "Prodo" entry
-                   (file+headline "~/Dropbox/org/prodo.org" "Prodo")
-                   "* TODO %^{What Do}\n"
                    :empty-lines-after 1))
     (add-to-list 'org-capture-templates
                  '("d" "Did" entry
@@ -815,6 +824,13 @@ Git god mod
 #+BEGIN_SRC emacs-lisp
   (use-package htmlize)
 #+END_SRC
+** Ox Hugo
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-hugo)
+  (require 'ox-hugo-auto-export)
+#+END_SRC
+
 * Avy
 
 #+BEGIN_SRC emacs-lisp
@@ -946,38 +962,38 @@ Git god mod
 
 #+BEGIN_SRC emacs-lisp
   (use-package neotree
-    :config
-    (setq neo-theme 'arrow
-          neo-autorefresh nil))
+      :config
+      (setq neo-theme 'arrow
+            neo-autorefresh nil))
 
-  (defun neotree-project-dir-toggle ()
-    "Open NeoTree using the project root, using find-file-in-project,
-  or the current buffer directory."
-    (interactive)
-    (let ((project-dir
-           (ignore-errors
-             ;;; Pick one: projectile or find-file-in-project
-                                          ; (projectile-project-root)
-             (ffip-project-root)
-             ))
-          (file-name (buffer-file-name))
-          (neo-smart-open t))
-      (if (and (fboundp 'neo-global--window-exists-p)
-               (neo-global--window-exists-p))
-          (neotree-hide)
-        (progn
-          (neotree-show)
-          (if project-dir
-              (neotree-dir project-dir))
-          (if file-name
-              (neotree-find file-name))))))
+    (defun neotree-project-dir-toggle ()
+      "Open NeoTree using the project root, using find-file-in-project,
+    or the current buffer directory."
+      (interactive)
+      (let ((project-dir
+             (ignore-errors
+               ;;; Pick one: projectile or find-file-in-project
+                                            ; (projectile-project-root)
+               (ffip-project-root)
+               ))
+            (file-name (buffer-file-name))
+            (neo-smart-open t))
+        (if (and (fboundp 'neo-global--window-exists-p)
+                 (neo-global--window-exists-p))
+            (neotree-hide)
+          (progn
+            (neotree-show)
+            (if project-dir
+                (neotree-dir project-dir))
+            (if file-name
+                (neotree-find file-name))))))
 
-  (general-define-key
-   "C-x t" '(neotree-project-dir-toggle :which-key "neotree"))
+    (general-define-key
+     "C-x t" '(neotree-project-dir-toggle :which-key "neotree"))
 
-  (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-enter)
-  (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
-  (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-enter)
+    (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-enter)
+    (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
+    (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-enter)
 #+END_SRC
 
 * Undo Tree
@@ -1182,6 +1198,14 @@ Git god mod
 
   (general-define-key
    "C-M-s" 'hydra-smartparens/body)
+#+END_SRC
+
+* Macros
+
+#+BEGIN_SRC emacs-lisp
+  (general-define-key
+   :keymaps 'normal
+   "m" 'kmacro-end-or-call-macro)
 #+END_SRC
 
 * Key Frequency
@@ -1524,6 +1548,13 @@ Use local version of eslint is available
 #+BEGIN_SRC emacs-lisp
   (use-package dockerfile-mode)
 #+END_SRC
+** Vim
+
+#+BEGIN_SRC emacs-lisp
+  (use-package vimrc-mode)
+  (add-to-list 'auto-mode-alist '("\\.vim\\(rc\\)?\\'" . vimrc-mode))
+#+END_SRC
+
 * Rest Client
 
 #+BEGIN_SRC emacs-lisp

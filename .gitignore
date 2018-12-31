@@ -157,6 +157,5 @@ semanticdb/
 *.elc
 /meghanada
 ./eshell
- hello
 
 secret.el

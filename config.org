@@ -244,6 +244,11 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
    "C-k" 'evil-previous-line
    "C-g" 'evil-force-normal-state
    "C-[" 'evil-force-normal-state)
+
+  ;; no keymaps defined here
+  (general-define-key
+   :states 'insert
+   "C-g" 'evil-force-normal-state)
 #+END_SRC
 
 ** Surround
@@ -382,13 +387,16 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 * Theme
 
 #+BEGIN_SRC emacs-lisp
+  (use-package atom-one-dark-theme)
+  (load-theme 'atom-one-dark t)
+
   (use-package doom-themes)
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t
         doom-one-brighter-comments t
         doom-dracula-brighter-comments t)
 
-  (load-theme 'doom-one t)
+  ;; (load-theme 'doom-one t)
 #+END_SRC
 
 * Cursor
@@ -396,7 +404,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 #+BEGIN_SRC emacs-lisp
   (blink-cursor-mode 0)
   (setq-default cursor-type 'box)
-  (set-cursor-color "#e98de9")
+  ;; (set-cursor-color "#e98de9")
 #+END_SRC
 
 * Modeline
@@ -415,7 +423,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 #+BEGIN_SRC emacs-lisp
   (set-face-attribute 'default nil
                       :family "Source Code Pro"
-                      :height 150
+                      :height 140
                       :weight 'normal)
 
   (global-prettify-symbols-mode +1)

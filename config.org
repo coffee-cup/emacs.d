@@ -788,7 +788,7 @@ Git god mod
     (setq org-capture-templates '())
     (add-to-list 'org-capture-templates
                  '("t" "Todo" entry
-                   (file+headline "~/Dropbox/org/todos.org" "Todos")
+                   (file "~/Dropbox/org/todos.org")
                    "* TODO %^{What Do}\n SCHEDULED: %^{Scheduled}t\n"
                    :empty-lines-after 1))
     (add-to-list 'org-capture-templates
@@ -915,7 +915,8 @@ Git god mod
   (use-package imenu-anywhere)
 
   (general-define-key
-   "C-'" 'imenu-anywhere)
+   "C-'" 'imenu-anywhere
+   "C-x i" 'imenu-list-smart-toggle)
 #+END_SRC
 
 * Dash Docs
@@ -944,7 +945,7 @@ Git god mod
   (use-package company
     :init (add-hook 'after-init-hook 'global-company-mode)
     :config
-    (setq company-idle-delay 0.1
+    (setq company-idle-delay 0.2
           company-minimum-prefix-length 2
           company-show-numbers nil
           company-tooltip-limit 20

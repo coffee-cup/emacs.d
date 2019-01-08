@@ -181,12 +181,6 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     "r"  '(:ignore t :which-key "ring buffer")
     "ry" '(counsel-yank-pop :which-key "search history")
 
-    ;; jumping to registers
-    "j"  '(:ignore t :which-key "jumping")
-    "js" '(point-to-register :which-key "set register")
-    "jk" '(point-to-garbage-register :which-key "set garbage")
-    "jg" '(jump-to-register :which-key "jump to register")
-
     ;; shell
     "s"  '(:ignore t :which-key "shell")
     "sn" '(multi-term :which-key "new shell")
@@ -224,7 +218,9 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
   (use-package evil-collection
     :after evil
     :config
-    (evil-collection-init))
+    (evil-collection-init)
+    (evil-collection-wdired-setup))
+
   (setq evil-collection-company-use-tng nil)
 #+END_SRC
 
@@ -249,6 +245,11 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
   (general-define-key
    :states 'insert
    "C-g" 'evil-force-normal-state)
+
+  (general-define-key
+   :state 'insert
+   :keymaps '(company-active-map company-search-map)
+   "C-g" 'evil-force-normal-state)
 #+END_SRC
 
 ** Surround
@@ -257,6 +258,16 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
   (use-package evil-surround
     :config
     (global-evil-surround-mode 1))
+#+END_SRC
+
+* Movement
+** Move to end of line
+
+#+BEGIN_SRC emacs-lisp
+  (general-define-key
+   :keymaps 'global-map
+   :states 'insert
+   "C-l" 'evil-append-line)
 #+END_SRC
 
 * Misc
@@ -368,16 +379,6 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     (find-file "~/Dropbox/org/prodo.org"))
 #+END_SRC
 
-** Jump to garbage
-
-#+BEGIN_SRC emacs-lisp
-  (defun point-to-garbage-register ()
-    "jump to garbage register"
-    (interactive)
-    (point-to-register "k")
-    )
-#+END_SRC
-
 * Icons
 
 #+BEGIN_SRC emacs-lisp
@@ -404,7 +405,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 #+BEGIN_SRC emacs-lisp
   (blink-cursor-mode 0)
   (setq-default cursor-type 'box)
-  ;; (set-cursor-color "#e98de9")
+  (set-cursor-color "#e98de9")
 #+END_SRC
 
 * Modeline
@@ -421,10 +422,13 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 * Font
 
 #+BEGIN_SRC emacs-lisp
-  (set-face-attribute 'default nil
-                      :family "Source Code Pro"
-                      :height 140
-                      :weight 'normal)
+  ;; (set-face-attribute 'default nil
+  ;;                     :family "Source Code Pro"
+  ;;                     :height 140
+  ;;                     :weight 'normal)
+
+  (add-to-list 'default-frame-alist
+               '(font . "Source Code Pro-10"))
 
   (global-prettify-symbols-mode +1)
 #+END_SRC
@@ -505,6 +509,19 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
                  (reusable-frames . visible)
                  (side            . bottom)
                  (window-height   . 0.4)))
+#+END_SRC
+
+* Marks
+
+#+BEGIN_SRC emacs-lisp
+  (defun my-push-mark (arg)
+    (interactive "P")
+    (set-mark-command nil)
+    (deactivate-mark))
+
+  (general-define-key
+   :states 'normal
+   "C-j" 'my-push-mark)
 #+END_SRC
 
 * Editing
@@ -608,6 +625,11 @@ Vim like % emulation
    :states 'visual
    "C-j" 'drag-stuff-down
    "C-k" 'drag-stuff-up)
+
+  (general-define-key
+   :states 'normal
+   "M-n" 'drag-stuff-down
+   "M-p" 'drag-stuff-up)
 #+END_SRC
 
 * Indentation and Buffer Cleanup
@@ -709,6 +731,13 @@ Git god mod
 #+END_SRC
 
 * Org Mode
+** Ox Hugo
+
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package ox-hugo)
+  ;; (require 'ox-hugo-auto-export)
+#+END_SRC
+
 ** Evil Org
 
 #+BEGIN_SRC emacs-lisp
@@ -789,7 +818,7 @@ Git god mod
     (add-to-list 'org-capture-templates
                  '("t" "Todo" entry
                    (file "~/Dropbox/org/todos.org")
-                   "* TODO %^{What Do}\n SCHEDULED: %^{Scheduled}t\n"
+                   "* TODO %^{What Do}"
                    :empty-lines-after 1))
     (add-to-list 'org-capture-templates
                  '("d" "Did" entry
@@ -814,17 +843,7 @@ Git god mod
                    (file+headline "~/Dropbox/org/assignments.org" "Assignments")
                    "* TODO %^{Title} %^g\n DEADLINE: %^{Deadline}t\n"
                    :prepend t
-                   :empty-lines 1))
-    (add-to-list 'org-capture-templates
-                 '("i" "Idea" entry
-                   (file+headline "~/Dropbox/org/ideas.org" "Ideas")
-                   "* %^{Title}\n%u\n\n%?"
-                   :prepend t
-                   :empty-lines 1))
-    (add-to-list 'org-capture-templates
-                 '("j" "Journal" entry
-                   (function org-journal-find-location)
-                   "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")))
+                   :empty-lines 1)))
 #+END_SRC
 
 ** Htmlize
@@ -832,13 +851,6 @@ Git god mod
 #+BEGIN_SRC emacs-lisp
   (use-package htmlize)
 #+END_SRC
-** Ox Hugo
-
-#+BEGIN_SRC emacs-lisp
-  (use-package ox-hugo)
-  (require 'ox-hugo-auto-export)
-#+END_SRC
-
 * Avy
 
 #+BEGIN_SRC emacs-lisp
@@ -945,7 +957,7 @@ Git god mod
   (use-package company
     :init (add-hook 'after-init-hook 'global-company-mode)
     :config
-    (setq company-idle-delay 0.2
+    (setq company-idle-delay 0.1
           company-minimum-prefix-length 2
           company-show-numbers nil
           company-tooltip-limit 20
@@ -1373,6 +1385,14 @@ Keybindings
     (add-to-list 'company-backends 'company-ghci))
 
   (use-package hasky-stack)
+
+  (setq haskell-stylish-on-save t)
+  (add-hook 'haskell-mode-hook 'company-mode)
+  (add-hook 'haskell-interactive-mode-hook 'company-mode)
+
+  (general-define-key
+   :keymaps 'haskell-mode-map
+   "C-x C-e" 'hasky-stack-execute)
 #+END_SRC
 
 ** Elixir
@@ -1524,6 +1544,7 @@ Use local version of eslint is available
 
   (defun setup-tide-mode ()
     (interactive)
+    (tide-mode)
     (tide-setup)
     (flycheck-mode +1)
     (setq flycheck-check-syntax-automatically '(save mode-enabled))
@@ -1542,6 +1563,7 @@ Use local version of eslint is available
   (general-define-key
    :keymaps '(typescript-mode-map web-mode-map)
    "C-c r" 'tide-rename-symbol
+   "C-c o" 'tide-organize-imports
    :states 'motion
    "g d" 'tide-jump-to-definition)
 #+END_SRC

@@ -136,7 +136,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     "p"  '(:ignore t :which-key "projects")
     "pf" '(counsel-projectile-find-file :which-key "find file")
     "pl" '(counsel-projectile-switch-project :which-key "switch project")
-    "pg" '(counsel-projectile-ag :which-key "search project")
+    "pg" '(counsel-git-grep :which-key "search project")
 
     ;; buffers
     "b"  '(:ignore t :which-key "buffers")

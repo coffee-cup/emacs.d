@@ -78,9 +78,6 @@ change the code in the packages.
         require-final-newline t
         gc-cons-threshold 64000000)
 
-  ;; lines numbers in programming mode
-  (add-hook 'prog-mode-hook 'linum-mode)
-
   ;; line highlighting
   (global-hl-line-mode)
 #+END_SRC
@@ -155,6 +152,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     "w/" '(split-window-horizontally :which-key "split horizontally")
     "w-" '(split-window-vertically :which-key "split vertically")
     "wb" '(balance-windows :which-key "balance")
+    "ws" '(ace-swap-window :which-key "swap")
 
     ;; sidebar
     "t" '(treemacs :which-key "sidebar")
@@ -379,6 +377,19 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     (find-file "~/Dropbox/org/prodo.org"))
 #+END_SRC
 
+* Line Numbers
+
+#+BEGIN_SRC emacs-lisp
+  (use-package linum-relative)
+
+  (setq linum-relative-current-symbol "")
+  (custom-set-faces '(linum-relative-current-face
+                      ((t :inherit linum :foreground "#4b5361" :background "#282c34" :weight normal))))
+
+  (add-hook 'prog-mode-hook 'linum-mode)
+  (add-hook 'prog-mode-hook 'linum-relative-mode)
+#+END_SRC
+
 * Icons
 
 #+BEGIN_SRC emacs-lisp
@@ -422,13 +433,8 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 * Font
 
 #+BEGIN_SRC emacs-lisp
-  ;; (set-face-attribute 'default nil
-  ;;                     :family "Source Code Pro"
-  ;;                     :height 140
-  ;;                     :weight 'normal)
-
   (add-to-list 'default-frame-alist
-               '(font . "Source Code Pro-10"))
+               '(font . "Source Code Pro-14"))
 
   (global-prettify-symbols-mode +1)
 #+END_SRC
@@ -731,13 +737,6 @@ Git god mod
 #+END_SRC
 
 * Org Mode
-** Ox Hugo
-
-#+BEGIN_SRC emacs-lisp
-  ;; (use-package ox-hugo)
-  ;; (require 'ox-hugo-auto-export)
-#+END_SRC
-
 ** Evil Org
 
 #+BEGIN_SRC emacs-lisp
@@ -851,6 +850,33 @@ Git god mod
 #+BEGIN_SRC emacs-lisp
   (use-package htmlize)
 #+END_SRC
+** Ox Hugo
+
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package ox-hugo
+  ;;   :defer t
+  ;;   :config
+  ;;   (require 'ox-hugo-auto-export))
+#+END_SRC
+** Org brain
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org-brain
+    :init
+    (setq org-brain-path "~/Dropbox/org/brain")
+    ;; For Evil users
+    (with-eval-after-load 'evil
+      (evil-set-initial-state 'org-brain-visualize-mode 'emacs))
+    :config
+    (setq org-id-track-globally t)
+    (setq org-id-locations-file "~/.emacs.d/.org-id-locations")
+    (push '("b" "Brain" plain (function org-brain-goto-end)
+            "* %i%?" :empty-lines 1)
+          org-capture-templates)
+    (setq org-brain-visualize-default-choices 'all)
+    (setq org-brain-title-max-length 12))
+#+END_SRC
+
 * Avy
 
 #+BEGIN_SRC emacs-lisp
@@ -1328,6 +1354,8 @@ Keybindings
            ("\\.md\\'" . markdown-mode)
            ("\\.markdown\\'" . markdown-mode))
     :init (setq markdown-command "multimarkdown"))
+
+  (use-package edit-indirect)
 #+END_SRC
 
 ** Yaml
@@ -1387,12 +1415,16 @@ Keybindings
   (use-package hasky-stack)
 
   (setq haskell-stylish-on-save t)
+
   (add-hook 'haskell-mode-hook 'company-mode)
   (add-hook 'haskell-interactive-mode-hook 'company-mode)
 
   (general-define-key
+   :states 'normal
    :keymaps 'haskell-mode-map
-   "C-x C-e" 'hasky-stack-execute)
+   "C-x C-e" 'hasky-stack-execute
+   "C-c C-t" 'haskell-mode-show-type-at
+   "C-c C-l" 'haskell-process-load-file)
 #+END_SRC
 
 ** Elixir
@@ -1534,6 +1566,7 @@ Use local version of eslint is available
     (message "nop"))
 
   (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
+
   (add-hook 'web-mode-hook
             (lambda ()
               (when (string-equal "tsx" (file-name-extension buffer-file-name))
@@ -1565,7 +1598,8 @@ Use local version of eslint is available
    "C-c r" 'tide-rename-symbol
    "C-c o" 'tide-organize-imports
    :states 'motion
-   "g d" 'tide-jump-to-definition)
+   "g d" 'tide-jump-to-definition
+   "C-c l" 'setup-tide-mode)
 #+END_SRC
 
 ** Web
@@ -1607,6 +1641,12 @@ Use local version of eslint is available
     (elpy-enable))
 #+END_SRC
 
+** Racket
+
+#+BEGIN_SRC emacs-lisp
+  (use-package racket-mode)
+#+END_SRC
+
 ** Docker
 
 #+BEGIN_SRC emacs-lisp
@@ -1640,3 +1680,4 @@ So we can connect to emacs with ~emacsclient~
 #+BEGIN_SRC emacs-lisp
   (server-start)
 #+END_SRC
+

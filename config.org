@@ -160,7 +160,7 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
     ;; errors
     "e"  '(:ignore t :which-key "errors")
     "ef" '(flycheck-first-error :which-key "first error")
-    "el" '(flycheck-list-errors-toggle :which-key "list errors")
+    "el" '(hydra-flycheck/body :which-key "list errors")
     "en" '(flycheck-next-error :which-key "next error")
     "ep" '(flycheck-previous-error :which-key "prev error")
     "ev" '(flycheck-verify-setup :which-key "verify setup")
@@ -404,14 +404,15 @@ Use [[https://github.com/noctuid/general.el][general.el]] for configuring key bi
 * Line Numbers
 
 #+BEGIN_SRC emacs-lisp
-  (use-package linum-relative)
+  (use-package nlinum)
+  ;; (use-package linum-relative)
 
-  (setq linum-relative-current-symbol "")
-  (custom-set-faces '(linum-relative-current-face
-                      ((t :inherit linum :foreground "#4b5361" :background "#282c34" :weight normal))))
+  ;; (setq linum-relative-current-symbol "")
+  ;; (custom-set-faces '(linum-relative-current-face
+  ;;                     ((t :inherit linum :foreground "#4b5361" :background "#282c34" :weight normal))))
 
-  (add-hook 'prog-mode-hook 'linum-mode)
-  (add-hook 'prog-mode-hook 'linum-relative-mode)
+  (add-hook 'prog-mode-hook 'nlinum-mode)
+  ;; (add-hook 'prog-mode-hook 'linum-relative-mode)
 #+END_SRC
 
 * Icons
@@ -822,8 +823,8 @@ Git god mod
   (setq org-agenda-files (list "~/Dropbox/org/todos.org"
                                "~/Dropbox/org/assignments.org"
                                "~/Dropbox/org/notes.org"
-                               "~/Dropbox/org/mobile.org"
                                "~/Dropbox/org/prodo.org"
+                               "~/Dropbox/org/did.org"
                                ))
 
   (defun org-agenda-show-agenda-and-todo (&optional arg)
@@ -950,8 +951,10 @@ Git god mod
     (counsel-mode 1))
 
   (general-define-key
+   :states '(normal motion insert visual)
    "C-s" 'swiper
-   "M-x" 'counsel-M-x)
+   "M-x" 'counsel-M-x
+   "C-." 'avy-goto-word-1)
 #+END_SRC
 
 * Multiple Cursors
@@ -1007,7 +1010,7 @@ Git god mod
   (use-package company
     :init (add-hook 'after-init-hook 'global-company-mode)
     :config
-    (setq company-idle-delay 0.1
+    (setq company-idle-delay 0.2
           company-minimum-prefix-length 2
           company-show-numbers nil
           company-tooltip-limit 20
@@ -1015,9 +1018,9 @@ Git god mod
           company-dabbrev-ignore-case t))
 
   (use-package company-flx
-    :after company
-    :config
-    (company-flx-mode 1))
+    :after company)
+
+  (company-flx-mode 1)
 
   (use-package company-quickhelp
     :config
@@ -1162,8 +1165,8 @@ Git god mod
      :hint nil)
     "Errors"
     ("f"  flycheck-error-list-set-filter                            "Filter")
-    ("n"  flycheck-next-error                                       "Next")
-    ("p"  flycheck-previous-error                                   "Previous")
+    ("j"  flycheck-next-error                                       "Next")
+    ("k"  flycheck-previous-error                                   "Previous")
     ("gg" flycheck-first-error                                      "First")
     ("G"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
     ("q"  nil))
@@ -1321,6 +1324,41 @@ Git god mod
 #+END_SRC
 
 * Languages
+** Language Server Protocol
+
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-mode
+    :commands lsp
+    :hook (dart-mode . lsp))
+
+  (require 'lsp-clients)
+
+  (use-package lsp-ui
+    :commands lsp-ui-mode
+    :hook (lsp-mode . lsp-ui-mode)
+    :config
+    (setq lsp-ui-sideline-ignore-duplicate t
+          lsp-ui-sideline-enable t
+          lsp-ui-sideline-show-diagnostics nil
+          lsp-ui-sideline-show-code-actions nil
+          lsp-ui-doc-enable nil
+          lsp-ui-flycheck-enable t))
+
+  (use-package company-lsp
+    :commands company-lsp
+    :config
+    (push 'company-lsp company-backends)
+    (setq company-lsp-async t
+          company-lsp-cache-candidates 'auto
+          company-lsp-enable-recompletion t))
+
+  (general-define-key
+   :keymaps 'lsp-mode-map
+   "C-c C-d" 'lsp-ui-doc-show
+   "C-c C-s" 'lsp-ui-doc-hide
+   "C-c r" 'lsp-rename)
+#+END_SRC
+
 ** Spelling
 
 #+BEGIN_SRC emacs-lisp
@@ -1359,14 +1397,6 @@ Flycheck
   (setq flycheck-display-errors-delay 0.3)
   (with-eval-after-load 'flycheck-inline
     (flycheck-inline-mode))
-#+END_SRC
-
-Keybindings
-
-#+BEGIN_SRC emacs-lisp
-  (general-define-key
-   "C-," 'flycheck-previous-error
-   "C-." 'flycheck-next-error)
 #+END_SRC
 
 ** Markdown
@@ -1474,6 +1504,16 @@ Keybindings
 #+END_SRC
 
 ** JavaScript
+*** Node modules
+
+#+BEGIN_SRC emacs-lisp
+  (use-package add-node-modules-path)
+
+  (add-hook 'js-mode-hook #'add-node-modules-path)
+  (add-hook 'typescript-mode-hook #'add-node-modules-path)
+  (add-hook 'tide-mode-hook #'add-node-modules-path)
+#+END_SRC
+
 *** Js2
 
 #+BEGIN_SRC emacs-lisp
@@ -1580,7 +1620,7 @@ Use local version of eslint is available
 #+BEGIN_SRC emacs-lisp
   (use-package tide
     :after (typescript-mode company flycheck)
-    :hook ((typescript-mode . tide-setup)
+    :hook ((typescript-mode . setup-tide-mode)
            (typescript-mode . tide-hl-identifier-mode)))
 
   (setq company-tooltip-align-annotations t)
@@ -1598,6 +1638,11 @@ Use local version of eslint is available
 
   ;; enable typescript-tslint checker
   (flycheck-add-mode 'typescript-tslint 'web-mode)
+
+  (defun tslint-fix-file ()
+    (interactive)
+    (shell-command (concat "tslint --fix " (buffer-file-name)))
+    (revert-buffer t t))
 
   (defun setup-tide-mode ()
     (interactive)
@@ -1655,6 +1700,8 @@ Use local version of eslint is available
   (add-hook 'scss-mode-hook 'emmet-mode)
   (with-eval-after-load 'evil-maps
     (define-key evil-insert-state-map (kbd "C-p") 'emmet-expand-line))
+
+  (setq css-indent-offset 2)
 #+END_SRC
 
 ** Python
@@ -1683,10 +1730,34 @@ Use local version of eslint is available
   (add-to-list 'auto-mode-alist '("\\.vim\\(rc\\)?\\'" . vimrc-mode))
 #+END_SRC
 
+** Dart
+
+#+BEGIN_SRC emacs-lisp
+  (use-package dart-mode)
+
+  (add-hook 'dart-mode-hook 'flycheck-mode)
+
+  (setq dart-format-on-save t
+        dart-enable-analysis-server nil
+        dart-sdk-path "/Users/jakerunzer/dev/flutter/bin/cache/dart-sdk/")
+#+END_SRC
+
+** Flutter
+
+#+BEGIN_SRC emacs-lisp
+  (load "/Users/jakerunzer/.emacs.d/flutter.el")
+
+  (general-define-key
+   :keymaps 'dart-mode-map
+   "C-c C-r" 'flutter-run-or-hot-reload)
+#+END_SRC
+
 * Rest Client
 
 #+BEGIN_SRC emacs-lisp
   (use-package restclient)
+
+  (use-package company-restclient)
 #+END_SRC
 
 * Tramp

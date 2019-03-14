@@ -1010,7 +1010,7 @@ Git god mod
   (use-package company
     :init (add-hook 'after-init-hook 'global-company-mode)
     :config
-    (setq company-idle-delay 0.2
+    (setq company-idle-delay 0.1
           company-minimum-prefix-length 2
           company-show-numbers nil
           company-tooltip-limit 20
@@ -1766,6 +1766,16 @@ Use local version of eslint is available
   (setq tramp-default-method "ssh"
         tramp-auto-save-directory "~/tmp/tramp"
         tramp-chunksize 2000)
+#+END_SRC
+
+* Wakatime
+
+#+BEGIN_SRC emacs-lisp
+  (use-package wakatime-mode
+    :config
+    (setq wakatime-api-key "f175432d-53db-4495-9ef3-a518b67d4c1a")
+    (global-wakatime-mode)
+    )
 #+END_SRC
 
 * Server

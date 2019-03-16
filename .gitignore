@@ -156,6 +156,8 @@ semanticdb/
 /url/
 *.elc
 /meghanada
-./eshell
+eshell
+transient
+*.swp
 
 secret.el

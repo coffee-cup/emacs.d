@@ -125,6 +125,8 @@
     "b"  '(:ignore t :which-key "buffers")
     "bb"  '(ivy-switch-buffer :which-key "switch buffers")
     "bd" '(kill-current-buffer :which-key "kill current buffer")
+    "bp" '(previous-buffer :which-key "previous buffer")
+    "bn" '(next-buffer :which-key "next buffer")
     "bD" '(kill-buffers :which-key "kill-buffers")
 
     ;; windows
@@ -203,14 +205,28 @@
 ** Keybindings
 
 #+BEGIN_SRC emacs-lisp
+  (defun evil-keyboard-quit ()
+    "Keyboard quit and force normal state."
+    (interactive)
+    (and evil-mode (evil-force-normal-state))
+    (keyboard-quit))
+
+  (general-define-key
+   :keymaps '(evil-normal-state-map
+              evil-motion-state-map
+              evil-insert-state-map
+              evil-window-map
+              evil-operator-state-map
+              company-mode-map
+              company-active-map
+              company-filter-map
+              company-search-map
+              )
+   "C-g" 'evil-keyboard-quit)
+
   (general-define-key
    :states 'normal
    "gc" 'evilnc-comment-or-uncomment-lines)
-
-  (general-define-key
-   :states '(insert replace motion)
-   :keymaps '(global-map company-active-map company-search-map)
-   "C-g" 'evil-force-normal-state)
 #+END_SRC
 ** Surround
 
@@ -365,9 +381,8 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package emojify
-    :defer t
     :config
-    (global-emoify-mode))
+    (global-emojify-mode))
 #+END_SRC
 * Buffers
 ** Switch to buffer
@@ -569,6 +584,16 @@
   (use-package git-gutter-fringe)
 #+END_SRC
 
+** Gist
+
+#+BEGIN_SRC emacs-lisp
+  (use-package tabulated-list)
+  (use-package pcache)
+  (use-package logito)
+  (use-package gh)
+  (use-package gist)
+#+END_SRC
+
 * Projects
 
 #+BEGIN_SRC emacs-lisp
@@ -726,6 +751,19 @@
   (use-package undo-tree
     :config
     (global-undo-tree-mode))
+#+END_SRC
+
+* Snippets
+
+#+BEGIN_SRC emacs-lisp
+  (use-package yasnippet)
+  (use-package yasnippet-snippets)
+
+  (setq yas-snippet-dirs
+        '("~/.emacs.d/snippets"                 ;; personal snippets
+          ))
+
+  (yas-global-mode 1)
 #+END_SRC
 
 * Org
@@ -998,6 +1036,8 @@ So we can connect to emacs with ~emacsclient~
   (use-package lsp-mode
     :commands lsp)
 
+  (add-hook 'rust-mode-hook #'lsp)
+
   (require 'lsp-clients)
   (use-package lsp-ui
     :commands lsp-ui-mode
@@ -1138,7 +1178,7 @@ So we can connect to emacs with ~emacsclient~
 #+BEGIN_SRC emacs-lisp
   (use-package js2-mode)
 
-  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
 
   ;; better imenu
   (add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
@@ -1154,6 +1194,7 @@ React stuff
 #+BEGIN_SRC emacs-lisp
   (use-package rjsx-mode)
   (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
 #+END_SRC
 
 *** Tern
@@ -1268,6 +1309,14 @@ Use local version of eslint is available
    "C-c C-l" 'haskell-process-load-file)
 #+END_SRC
 
+** Rust
+
+#+BEGIN_SRC emacs-lisp
+  (use-package rust-mode)
+
+  (setq rust-format-on-save t)
+#+END_SRC
+
 ** Markdown
 
 #+BEGIN_SRC emacs-lisp
@@ -1275,6 +1324,7 @@ Use local version of eslint is available
     :commands (markdown-mode gfm-mode)
     :mode (("README\\.md\\'" . gfm-mode)
            ("\\.md\\'" . markdown-mode)
+           ("\\.mdx\\'" . markdown-mode)
            ("\\.markdown\\'" . markdown-mode))
     :init (setq markdown-command "multimarkdown"))
 
@@ -1298,4 +1348,15 @@ Use local version of eslint is available
 #+BEGIN_SRC emacs-lisp
   (use-package vimrc-mode)
   (add-to-list 'auto-mode-alist '("\\.vim\\(rc\\)?\\'" . vimrc-mode))
+#+END_SRC
+** Krill
+
+#+BEGIN_SRC emacs-lisp
+  (defvar krill-file-path "/Users/jakerunzer/dev/krill/.stack-work/dist/x86_64-osx/Cabal-2.4.0.1/build/krill/krill"
+    "Path to the krill program")
+
+  (defun run-krill ()
+    "Run a Krill interpreter."
+    (interactive)
+    (comint-run krill-file-path))
 #+END_SRC

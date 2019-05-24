@@ -13,7 +13,6 @@
  '(treemacs-follow-after-init t)
  '(treemacs-follow-mode t)
  '(treemacs-fringe-indicator-mode t)
- '(treemacs-git-mode (quote deferred))
  '(treemacs-icons-dired-mode t nil (treemacs-icons-dired))
  '(treemacs-recenter-after-project-expand (quote on-distance))
  '(treemacs-width 40))

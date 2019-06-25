@@ -134,11 +134,12 @@
 
     ;; buffers
     "b"  '(:ignore t :which-key "buffers")
-    "bb"  '(ivy-switch-buffer :which-key "switch buffers")
+    "bb" '(ivy-switch-buffer :which-key "switch buffers")
     "bd" '(kill-current-buffer :which-key "kill current buffer")
     "bp" '(previous-buffer :which-key "previous buffer")
     "bn" '(next-buffer :which-key "next buffer")
-    "bD" '(kill-buffers :which-key "kill-buffers")
+    "bD" '(kill-buffers :which-key "kill buffers")
+    "bf" '(frog-jump-buffer :which-key "frog jump buffer")
 
     ;; windows
     "w"  '(:ignore t :which-key "windows")
@@ -219,7 +220,7 @@
   (use-package evil-escape)
   (evil-escape-mode)
   (setq-default evil-escape-key-sequence "jk"
-                evil-escape-delay 0.2)
+                evil-escape-delay 0.1)
 
   ;; (defun evil-keyboard-quit ()
   ;;   "Keyboard quit and force normal state."
@@ -276,6 +277,15 @@
   (define-key evil-normal-state-map "K" 'evil-jump-out-args)
 #+END_SRC
 
+* Movement
+
+#+BEGIN_SRC emacs-lisp
+  (general-define-key
+   :states 'normal
+   "C-}" 'evil-scroll-line-down
+   "C-{" 'evil-scroll-line-up)
+#+END_SRC
+
 * Avy
 
 #+BEGIN_SRC emacs-lisp
@@ -328,7 +338,13 @@
    "M-x" 'counsel-M-x)
 #+END_SRC
 
-#+RESULTS:
+** Popups
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ace-popup-menu
+    :config
+    (ace-popup-menu-mode))
+#+END_SRC
 
 * Theme
 ** Bars
@@ -353,11 +369,47 @@
   (use-package all-the-icons)
 #+END_SRC
 
+** Font
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'default-frame-alist
+               '(font . "Source Code Pro-14"))
+
+  (global-prettify-symbols-mode +1)
+#+END_SRC
+
 ** Colours
 
 #+BEGIN_SRC emacs-lisp
-  (use-package atom-one-dark-theme)
-  (load-theme 'atom-one-dark t)
+  ;; (use-package doom-themes)
+  ;; (load-theme 'doom-spacegrey t)
+
+  ;; ;; Global settings (defaults)
+  ;; (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+  ;;       doom-themes-enable-italic t) ; if nil, italics is universally disabled
+
+  ;; ;; or for treemacs users
+  ;; (doom-themes-treemacs-config)
+
+  ;; ;; Corrects (and improves) org-mode's native fontification.
+  ;; (doom-themes-org-config)
+
+  (use-package solarized-theme
+    :init
+    (load-theme 'solarized-dark t)
+    :config
+    (setq solarized-use-less-bold t
+          solarized-use-variable-pitch nil
+          solarized-scale-org-headlines nil
+          solarized-height-minus-1 1.0
+          solarized-height-plus-1 1.0
+          solarized-height-plus-2 1.0
+          solarized-height-plus-3 1.0
+          solarized-height-plus-4 1.0))
+
+  ;; (use-package zenburn-theme
+  ;;   :init
+  ;;   (load-theme 'zenburn t))
 #+END_SRC
 
 ** Modeline
@@ -377,15 +429,6 @@
   (blink-cursor-mode 0)
   (setq-default cursor-type 'box)
   (set-cursor-color "#e98de9")
-#+END_SRC
-
-** Font
-
-#+BEGIN_SRC emacs-lisp
-  (add-to-list 'default-frame-alist
-               '(font . "Source Code Pro-14"))
-
-  (global-prettify-symbols-mode +1)
 #+END_SRC
 
 ** Line numbers
@@ -415,6 +458,12 @@
 #+BEGIN_SRC emacs-lisp
   (require 'uniquify)
   (setq uniquify-buffer-name-style 'forward)
+#+END_SRC
+
+** Frog buffer
+
+#+BEGIN_SRC emacs-lisp
+  (use-package frog-jump-buffer)
 #+END_SRC
 
 * Text
@@ -458,7 +507,7 @@
   (show-paren-mode 1)
 
   (setq show-paren-delay 0
-	show-paren-when-point-inside-paren t)
+        show-paren-when-point-inside-paren t)
 
   (use-package rainbow-delimiters)
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode-enable)
@@ -466,17 +515,17 @@
 
   ;; disable {} auto pairing in electric-pair-mode for web-mode
   (add-hook
-   'web-mode-hook
+   'rust-mode-hook
    (lambda ()
      (setq-local electric-pair-inhibit-predicate
-		 `(lambda (c)
-		    (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+                 `(lambda (c)
+                    (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 
   (use-package smartparens)
 
   (add-hook 'rust-mode-hook (lambda ()
-			      (smartparens-mode +1)
-			      (electric-pair-mode nil)))
+                              (smartparens-mode +1)
+                              (electric-pair-mode nil)))
 #+END_SRC
 
 ** Commenting
@@ -649,54 +698,6 @@
   (use-package dash-at-point)
 #+END_SRC
 * Tree
-** Neotree
-#+BEGIN_SRC emacs-lisp
-  ;; (use-package neotree
-  ;;   :config
-  ;;   (setq neo-theme 'arrow
-  ;;         neo-autorefresh nil))
-
-  ;; (defun neotree-project-dir-toggle ()
-  ;;   "Open NeoTree using the project root, using find-file-in-project,
-  ;;   or the current buffer directory."
-  ;;   (interactive)
-  ;;   (let ((project-dir
-  ;;          (ignore-errors
-  ;;              ;;; Pick one: projectile or find-file-in-project
-  ;;                                         ; (projectile-project-root)
-  ;;            (ffip-project-root)
-  ;;            ))
-  ;;         (file-name (buffer-file-name))
-  ;;         (neo-smart-open t))
-  ;;     (if (and (fboundp 'neo-global--window-exists-p)
-  ;;              (neo-global--window-exists-p))
-  ;;         (neotree-hide)
-  ;;       (progn
-  ;;         (neotree-show)
-  ;;         (if project-dir
-  ;;             (neotree-dir project-dir))
-  ;;         (if file-name
-  ;;             (neotree-find file-name))))))
-
-  ;; (general-define-key
-  ;;  "C-x t" '(neotree-project-dir-toggle :which-key "neotree"))
-
-  ;; (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-enter)
-  ;; (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
-  ;; (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-enter)
-
-  ;; ;; Set the neo-window-width to the current width of the
-  ;; ;; neotree window, to trick neotree into resetting the
-  ;; ;; width back to the actual window width.
-  ;; ;; Fixes: https://github.com/jaypei/emacs-neotree/issues/262
-  ;; (eval-after-load "neotree"
-  ;;   '(add-to-list 'window-size-change-functions
-  ;;                 (lambda (frame)
-  ;;                   (let ((neo-window (neo-global--get-window)))
-  ;;                     (unless (null neo-window)
-  ;;                       (setq neo-window-width (window-width neo-window)))))))
-#+END_SRC
-
 ** Treemacs
 
 #+BEGIN_SRC emacs-lisp
@@ -1062,8 +1063,33 @@ So we can connect to emacs with ~emacsclient~
   (add-hook 'text-mode-hook 'my-spellcheck-mode)
   (add-hook 'latex-mode-hook 'my-spellcheck-mode)
 
+  (defun mk-flyspell-correct-previous (&optional words)
+    "Correct word before point, reach distant words.
+
+  WORDS words at maximum are traversed backward until misspelled
+  word is found.  If it's not found, give up.  If argument WORDS is
+  not specified, traverse 12 words by default.
+
+  Return T if misspelled word is found and NIL otherwise.  Never
+  move point."
+    (interactive "P")
+    (let* ((Δ (- (point-max) (point)))
+           (counter (string-to-number (or words "12")))
+           (result
+            (catch 'result
+              (while (>= counter 0)
+                (when (cl-some #'flyspell-overlay-p
+                               (overlays-at (point)))
+                  (flyspell-correct-word-before-point)
+                  (throw 'result t))
+                (backward-word 1)
+                (setq counter (1- counter))
+                nil))))
+      (goto-char (- (point-max) Δ))
+      result))
+
   (general-define-key
-   "C-c s" 'flyspell-auto-correct-word)
+   "C-c s" 'mk-flyspell-correct-previous)
 #+END_SRC
 
 ** LSP
@@ -1153,15 +1179,17 @@ So we can connect to emacs with ~emacsclient~
   (defun tide-format()
     (message "nop"))
 
-  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . (lambda ()
-                                                  (web-mode)
-                                                  (typescript-mode))))
+  ;; (add-to-list 'auto-mode-alist '("\\.tsx\\'" . (lambda ()
+  ;;                                                 (web-mode)
+  ;;                                                 (typescript-mode))))
 
+  (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
   (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
   (add-hook 'web-mode-hook
             (lambda ()
               (when (string-equal "tsx" (file-name-extension buffer-file-name))
-                (setup-tide-mode))))
+                (setup-tide-mode)
+                (message "typescript!"))))
 
   ;; enable typescript-tslint checker
   (flycheck-add-mode 'typescript-tslint 'web-mode)

@@ -581,6 +581,21 @@
   (setq-default show-trailing-whitespace nil)
 #+END_SRC
 
+** Highlight at point
+
+#+BEGIN_SRC emacs-lisp
+  (require 'hi-lock)
+  (defun toggle-mark-word-at-point ()
+    (interactive)
+    (if hi-lock-interactive-patterns
+        (unhighlight-regexp (car (car hi-lock-interactive-patterns)))
+      (highlight-symbol-at-point)))
+
+  (general-define-key
+   :states '(normal motion)
+   "s-." 'toggle-mark-word-at-point)
+#+END_SRC
+
 * Window Management
 
 #+BEGIN_SRC emacs-lisp
@@ -589,6 +604,16 @@
 
   (general-define-key
    "C-x o" 'ace-window)
+#+END_SRC
+
+** Golden ratio
+
+#+BEGIN_SRC emacs-lisp
+  (use-package golden-ratio
+    :init
+    (golden-ratio-mode 1))
+
+  (add-to-list 'golden-ratio-extra-commands 'ace-window)
 #+END_SRC
 
 ** Buffer alist config

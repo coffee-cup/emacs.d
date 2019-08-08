@@ -7,7 +7,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (golden-ratio ace-popup-menu frog-jump-buffer zenburn-theme zenburn smartparens-mode smartparens evil-escape cargo indium paradox sublimity gist gh logito pcache rust-mode yasnippet-snippets treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil treemacs dash-at-point all-the-icons-dired all-the-icons-dired-mode dired-x dired-details dired-dired+ dired+ drag-stuff move-text ace-window emojify doom-modeline atom-one-dark-theme all-the-icons evil-surround use-package)))
+    (writeroom-mode company-tabnine dad-joke zoom golden-ratio ace-popup-menu frog-jump-buffer zenburn-theme zenburn smartparens-mode smartparens evil-escape cargo indium paradox sublimity gist gh logito pcache rust-mode yasnippet-snippets treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil treemacs dash-at-point all-the-icons-dired all-the-icons-dired-mode dired-x dired-details dired-dired+ dired+ drag-stuff move-text ace-window emojify doom-modeline atom-one-dark-theme all-the-icons evil-surround use-package)))
  '(treemacs-collapse-dirs 3)
  '(treemacs-filewatch-mode t)
  '(treemacs-follow-after-init t)

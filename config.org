@@ -151,7 +151,7 @@
     "wk" '(windmove-up :which-key "up window")
     "w/" '(split-window-horizontally :which-key "split horizontally")
     "w-" '(split-window-vertically :which-key "split vertically")
-    "wb" '(balance-windows :which-key "balance")
+    "wb" '(zoom :which-key "balance")
     "ws" '(ace-swap-window :which-key "swap")
 
     ;; sidebar
@@ -373,7 +373,7 @@
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'default-frame-alist
-               '(font . "Source Code Pro-14"))
+               '(font . "Office Code Pro-14"))
 
   (global-prettify-symbols-mode +1)
 #+END_SRC
@@ -609,11 +609,15 @@
 ** Golden ratio
 
 #+BEGIN_SRC emacs-lisp
-  (use-package golden-ratio
+  (use-package zoom
     :init
-    (golden-ratio-mode 1))
+    (zoom-mode t))
 
-  (add-to-list 'golden-ratio-extra-commands 'ace-window)
+  (defun size-callback ()
+    (cond ((> (frame-pixel-width) 1280) '(90 . 0.6))
+          (t                            '(0.5 . 0.5))))
+
+  (setq zoom-size 'size-callback)
 #+END_SRC
 
 ** Buffer alist config
@@ -1457,4 +1461,9 @@ Use local version of eslint is available
     "Run a Krill interpreter."
     (interactive)
     (comint-run krill-file-path))
+#+END_SRC
+* Random
+
+#+BEGIN_SRC emacs-lisp
+  (use-package dad-joke)
 #+END_SRC

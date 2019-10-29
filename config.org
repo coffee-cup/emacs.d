@@ -14,10 +14,22 @@
 ** Setup
 #+BEGIN_SRC emacs-lisp
   (require 'package)
-  (setq package-enable-at-startup nil)
-  (add-to-list 'package-archives
-               '("melpa" . "https://melpa.org/packages/"))
-
+  (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                      (not (gnutls-available-p))))
+         (proto (if no-ssl "http" "https")))
+    (when no-ssl
+      (warn "\
+  Your version of Emacs does not support SSL connections,
+  which is unsafe because it allows man-in-the-middle attacks.
+  There are two things you can do about this warning:
+  1. Install an Emacs version that does support SSL and be safe.
+  2. Remove this warning from your init file so you won't see it again."))
+    ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
+    (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+    ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+    (when (< emacs-major-version 24)
+      ;; For important compatibility libraries like cl-lib
+      (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
   (package-initialize)
 
   ;; Bootstrap `use-package'
@@ -381,10 +393,11 @@
 ** Colours
 
 #+BEGIN_SRC emacs-lisp
-  ;; (use-package doom-themes)
-  ;; (load-theme 'doom-spacegrey t)
+  (use-package doom-themes)
+  (load-theme 'doom-solarized-dark t)
 
-  ;; ;; Global settings (defaults)
+  ;; ;; 
+  ;; Global settings (defaults)
   ;; (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
   ;;       doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
@@ -394,18 +407,18 @@
   ;; ;; Corrects (and improves) org-mode's native fontification.
   ;; (doom-themes-org-config)
 
-  (use-package solarized-theme
-    :init
-    (load-theme 'solarized-dark t)
-    :config
-    (setq solarized-use-less-bold t
-          solarized-use-variable-pitch nil
-          solarized-scale-org-headlines nil
-          solarized-height-minus-1 1.0
-          solarized-height-plus-1 1.0
-          solarized-height-plus-2 1.0
-          solarized-height-plus-3 1.0
-          solarized-height-plus-4 1.0))
+  ;; (use-package solarized-theme
+  ;;   :init
+  ;;   (load-theme 'solarized-dark t)
+  ;;   :config
+  ;;   (setq solarized-use-less-bold t
+  ;;         solarized-use-variable-pitch nil
+  ;;         solarized-scale-org-headlines nil
+  ;;         solarized-height-minus-1 1.0
+  ;;         solarized-height-plus-1 1.0
+  ;;         solarized-height-plus-2 1.0
+  ;;         solarized-height-plus-3 1.0
+  ;;         solarized-height-plus-4 1.0))
 
   ;; (use-package zenburn-theme
   ;;   :init
@@ -747,7 +760,7 @@
             treemacs-indentation-string            " "
             treemacs-is-never-other-window         nil
             treemacs-max-git-entries               5000
-            treemacs-no-png-images                 nil
+            treemacs-no-png-images                 t
             treemacs-no-delete-other-windows       t
             treemacs-project-follow-cleanup        nil
             treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
@@ -772,6 +785,7 @@
 
       (treemacs-follow-mode t)
       (treemacs-filewatch-mode t)
+      (treemacs-icons-dired-mode nil)
       (treemacs-fringe-indicator-mode t)
       (pcase (cons (not (null (executable-find "git")))
                    (not (null (executable-find "python3"))))
@@ -796,14 +810,16 @@
     :after treemacs projectile
     :ensure t)
 
-  (use-package treemacs-icons-dired
-    :after treemacs dired
-    :ensure t
-    :config (treemacs-icons-dired-mode))
+  ;; (use-package treemacs-icons-dired
+  ;;   :after treemacs dired
+  ;;   :ensure t
+  ;;   :config (treemacs-icons-dired-mode))
 
   (use-package treemacs-magit
     :after treemacs magit
     :ensure t)
+
+  (treemacs-icons-dired-mode -1)
 #+END_SRC
 
 * Undo Tree
@@ -1128,6 +1144,7 @@ So we can connect to emacs with ~emacsclient~
     :commands lsp)
 
   (require 'lsp-clients)
+  
   (use-package lsp-ui
     :commands lsp-ui-mode
     :hook (lsp-mode . lsp-ui-mode)
@@ -1298,6 +1315,7 @@ Use local version of eslint is available
   (add-hook 'js2-mode-hook #'prettier-js-mode)
   (add-hook 'json-mode-hook #'prettier-js-mode)
   (add-hook 'rjsx-mode-hook #'prettier-js-mode)
+  (add-hook 'markdown-mode-hook #'prettier-js-mode)
 #+END_SRC
 
 *** Indium
@@ -1374,6 +1392,12 @@ Use local version of eslint is available
    "C-c l" 'setup-tide-mode)
 #+END_SRC
 
+** Vue
+
+#+BEGIN_SRC emacs-lisp
+  (use-package vue-mode)
+#+END_SRC
+
 ** Haskell
 
 #+BEGIN_SRC emacs-lisp
@@ -1419,6 +1443,17 @@ Use local version of eslint is available
   (setq rust-format-on-save t)
 #+END_SRC
 
+** Elixir
+
+#+BEGIN_SRC emacs-lisp
+  (use-package elixir-mode)
+
+  (add-hook 'elixir-mode-hook #'lsp)
+
+  (add-hook 'elixir-mode-hook
+            (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
+#+END_SRC
+
 ** Markdown
 
 #+BEGIN_SRC emacs-lisp
@@ -1439,10 +1474,22 @@ Use local version of eslint is available
   (use-package yaml-mode)
 #+END_SRC
 
+** Go
+
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package go-mode)
+#+END_SRC
+
 ** Docker
 
 #+BEGIN_SRC emacs-lisp
   (use-package dockerfile-mode)
+#+END_SRC
+
+** Elm
+
+#+BEGIN_SRC emacs-lisp
+  (use-package elm-mode)
 #+END_SRC
 
 ** Vim
@@ -1462,8 +1509,29 @@ Use local version of eslint is available
     (interactive)
     (comint-run krill-file-path))
 #+END_SRC
+
+** Terraform
+
+#+BEGIN_SRC emacs-lisp
+  (use-package terraform-mode)
+#+END_SRC
+
 * Random
+
+** Jokes
 
 #+BEGIN_SRC emacs-lisp
   (use-package dad-joke)
+#+END_SRC
+
+** Insert date
+
+#+BEGIN_SRC emacs-lisp
+  (defun insert-todays-date ()
+    (interactive)
+    (insert (format-time-string "%d/%m/%Y")))
+
+  (general-define-key
+   :keymaps 'markdown-mode-map
+   "C-c C-d" 'insert-todays-date)
 #+END_SRC

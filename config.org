@@ -172,7 +172,7 @@
     ;; errors
     "e"  '(:ignore t :which-key "errors")
     "ef" '(flycheck-first-error :which-key "first error")
-    "el" '(hydra-flycheck/body :which-key "list errors")
+    "el" '(flycheck-list-errors-toggle :which-key "list errors")
     "en" '(flycheck-next-error :which-key "next error")
     "ep" '(flycheck-previous-error :which-key "prev error")
     "ev" '(flycheck-verify-setup :which-key "verify setup")
@@ -1144,7 +1144,14 @@ So we can connect to emacs with ~emacsclient~
     :commands lsp)
 
   (require 'lsp-clients)
-  
+
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection `("unified-language-server" "--parser=remark-parse" "--stdio"))
+                    :major-modes '(markdown-mode)
+                    :server-id 'unified-md))
+  (add-to-list 'lsp-language-id-configuration '(markdown-mode . "markdown"))
+  (add-hook 'markdown-mode-hook #'lsp)
+
   (use-package lsp-ui
     :commands lsp-ui-mode
     :hook (lsp-mode . lsp-ui-mode)
@@ -1306,9 +1313,9 @@ Use local version of eslint is available
 #+BEGIN_SRC emacs-lisp
   (use-package prettier-js)
 
-  (setq prettier-js-args '(
-                          "--trailing-comma" "all"
-                          "--single-quote" "false"))
+  ;; (setq prettier-js-args '(
+  ;;                         "--trailing-comma" "all"
+  ;;                         "--single-quote" "false"))
 
   (add-hook 'web-mode-hook #'prettier-js-mode)
   (add-hook 'typescript-mode-hook #'prettier-js-mode)
@@ -1392,6 +1399,12 @@ Use local version of eslint is available
    "C-c l" 'setup-tide-mode)
 #+END_SRC
 
+** PEG Grammar
+
+#+BEGIN_SRC emacs-lisp
+  (load "/Users/jakerunzer/.emacs.d/peg-mode.el")
+#+END_SRC
+
 ** Vue
 
 #+BEGIN_SRC emacs-lisp
@@ -1466,6 +1479,11 @@ Use local version of eslint is available
     :init (setq markdown-command "multimarkdown"))
 
   (use-package edit-indirect)
+
+  ;; let g:LanguageClient_serverCommands = {
+  ;; \ 'text': ['unified-language-server', '--parser=retext-english', '--stdio'],
+  ;; \ 'markdown': ['unified-language-server', '--parser=remark-parse', '--stdio'],
+  ;; \ }
 #+END_SRC
 
 ** Yaml
@@ -1514,6 +1532,18 @@ Use local version of eslint is available
 
 #+BEGIN_SRC emacs-lisp
   (use-package terraform-mode)
+#+END_SRC
+
+** Racket
+
+#+BEGIN_SRC emacs-lisp
+  (use-package racket-mode)
+#+END_SRC
+
+** GraphQL
+
+#+BEGIN_SRC emacs-lisp
+  (use-package graphql-mode)
 #+END_SRC
 
 * Random

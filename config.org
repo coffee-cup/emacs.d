@@ -501,6 +501,19 @@
   (add-hook 'markdown-mode-hook 'better-text-hook)
 #+END_SRC
 
+** Unfill
+
+#+BEGIN_SRC emacs-lisp
+  ;;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph
+  (defun unfill-paragraph (&optional region)
+    "Takes a multi-line paragraph and makes it into a single line of text."
+    (interactive (progn (barf-if-buffer-read-only) '(t)))
+    (let ((fill-column (point-max))
+          ;; This would override `fill-column' if it's an integer.
+          (emacs-lisp-docstring-fill-column t))
+      (fill-paragraph nil region)))
+#+END_SRC
+
 ** Expand region
 
 #+BEGIN_SRC emacs-lisp
@@ -1544,6 +1557,12 @@ Use local version of eslint is available
 
 #+BEGIN_SRC emacs-lisp
   (use-package graphql-mode)
+#+END_SRC
+
+** GLSL
+
+#+BEGIN_SRC emacs-lisp
+  (use-package glsl-mode)
 #+END_SRC
 
 * Random

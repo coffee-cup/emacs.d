@@ -1249,14 +1249,20 @@ So we can connect to emacs with ~emacsclient~
 
 #+BEGIN_SRC emacs-lisp
   (use-package js2-mode)
-
-  ;; (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
 
   ;; better imenu
   (add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
 
   ;; configs
   (setq js-indent-level 2)
+  (setq js2-strict-missing-semi-warning nil)
+#+END_SRC
+
+*** LSP
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'js2-mode-hook #'lsp)
 #+END_SRC
 
 *** Jsx
@@ -1272,24 +1278,20 @@ React stuff
 *** Tern
 
 #+BEGIN_SRC emacs-lisp
-  (use-package tern)
-  (add-hook 'js-mode-hook (lambda () (tern-mode t)))
+  ;; (use-package tern)
+  ;; (add-hook 'js-mode-hook (lambda () (tern-mode t)))
 #+END_SRC
 
 *** Autocomplete
 
 #+BEGIN_SRC emacs-lisp
-  (use-package company-tern)
-  (add-to-list 'company-backends 'company-tern)
-  (add-hook 'js2-mode-hook (lambda ()
-                              (tern-mode)
-                              (company-mode)))
+  ;; (use-package company-tern)
+  ;; (add-to-list 'company-backends 'company-tern)
 #+END_SRC
 
 *** Eslint
 
 #+BEGIN_SRC emacs-lisp
-  ;; disable jshint since we prefer eslint
   (setq-default flycheck-disabled-checkers
               (append flycheck-disabled-checkers
                       '(javascript-jshint)))
@@ -1326,34 +1328,12 @@ Use local version of eslint is available
 #+BEGIN_SRC emacs-lisp
   (use-package prettier-js)
 
-  ;; (setq prettier-js-args '(
-  ;;                         "--trailing-comma" "all"
-  ;;                         "--single-quote" "false"))
-
   (add-hook 'web-mode-hook #'prettier-js-mode)
   (add-hook 'typescript-mode-hook #'prettier-js-mode)
   (add-hook 'js2-mode-hook #'prettier-js-mode)
   (add-hook 'json-mode-hook #'prettier-js-mode)
   (add-hook 'rjsx-mode-hook #'prettier-js-mode)
   (add-hook 'markdown-mode-hook #'prettier-js-mode)
-#+END_SRC
-
-*** Indium
-
-#+BEGIN_SRC emacs-lisp
-  (use-package indium)
-#+END_SRC
-
-*** Autogood
-
-#+BEGIN_SRC emacs-lisp
-  ;; (load "/Users/jakerunzer/.emacs.d/autogood.el")
-  ;; (require 'autogood)
-
-  ;; (add-hook 'typescript-mode-hook #'autogood-mode)
-  ;; (add-hook 'js2-mode-hook #'autogood-mode)
-  ;; (add-hook 'json-mode-hook #'autogood-mode)
-  ;; (add-hook 'rjsx-mode-hook #'autogood-mode)
 #+END_SRC
 
 ** Typescript

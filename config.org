@@ -385,7 +385,7 @@
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'default-frame-alist
-               '(font . "Office Code Pro-14"))
+               '(font . "JetBrains Mono-14"))
 
   (global-prettify-symbols-mode +1)
 #+END_SRC
@@ -1298,6 +1298,7 @@ React stuff
 
   ;; use eslint with web-mode for jsx files
   (flycheck-add-mode 'javascript-eslint 'web-mode)
+  (add-hook 'js-mode-hook 'eslint-mode)
 #+END_SRC
 
 Use local version of eslint is available
@@ -1546,7 +1547,6 @@ Use local version of eslint is available
 #+END_SRC
 
 * Random
-
 ** Jokes
 
 #+BEGIN_SRC emacs-lisp

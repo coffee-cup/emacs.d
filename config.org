@@ -48,6 +48,17 @@
   (setq use-package-always-ensure t)
 #+END_SRC
 
+** Auto Update
+
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-package-update)
+
+  (setq auto-package-update-interval 1
+	auto-package-update-delete-old-versions t)
+
+  (auto-package-update-maybe)
+#+END_SRC
+
 * Path
 
 #+BEGIN_SRC emacs-lisp
@@ -211,7 +222,10 @@
 ** Setup
 
 #+BEGIN_SRC emacs-lisp
+  (use-package annalist)
+
   (use-package evil
+    :after annalist
     :init
     (setq evil-want-integration t)
     (setq evil-want-keybinding nil)
@@ -220,44 +234,26 @@
 
   (use-package evil-collection
     :after evil
+    :init
+    (setq evil-collection-company-use-tng nil)
     :config
     (evil-collection-init)
     (evil-collection-wdired-setup))
-
-  (setq evil-collection-company-use-tng nil)
 #+END_SRC
+j
 ** Keybindings
 
 #+BEGIN_SRC emacs-lisp
   (use-package evil-escape)
   (evil-escape-mode)
   (setq-default evil-escape-key-sequence "jk"
-                evil-escape-delay 0.1)
-
-  ;; (defun evil-keyboard-quit ()
-  ;;   "Keyboard quit and force normal state."
-  ;;   (interactive)
-  ;;   (and evil-mode (evil-force-normal-state))
-  ;;   (keyboard-quit)
-  ;;   (setq unread-command-events (listify-key-sequence "ESC")))
-
-  ;; (general-define-key
-  ;;  :keymaps '(evil-normal-state-map
-  ;;             evil-motion-state-map
-  ;;             evil-insert-state-map
-  ;;             evil-window-map
-  ;;             evil-operator-state-map
-  ;;             company-mode-map
-  ;;             company-active-map
-  ;;             company-filter-map
-  ;;             company-search-map
-  ;;             )
-  ;;  "C-g" 'evil-keyboard-quit)
+		evil-escape-delay 0.1)
 
   (general-define-key
    :states 'normal
    "gc" 'evilnc-comment-or-uncomment-lines)
 #+END_SRC
+
 ** Surround
 
 #+BEGIN_SRC emacs-lisp
@@ -395,34 +391,6 @@
 #+BEGIN_SRC emacs-lisp
   (use-package doom-themes)
   (load-theme 'doom-solarized-dark t)
-
-  ;; ;; 
-  ;; Global settings (defaults)
-  ;; (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-  ;;       doom-themes-enable-italic t) ; if nil, italics is universally disabled
-
-  ;; ;; or for treemacs users
-  ;; (doom-themes-treemacs-config)
-
-  ;; ;; Corrects (and improves) org-mode's native fontification.
-  ;; (doom-themes-org-config)
-
-  ;; (use-package solarized-theme
-  ;;   :init
-  ;;   (load-theme 'solarized-dark t)
-  ;;   :config
-  ;;   (setq solarized-use-less-bold t
-  ;;         solarized-use-variable-pitch nil
-  ;;         solarized-scale-org-headlines nil
-  ;;         solarized-height-minus-1 1.0
-  ;;         solarized-height-plus-1 1.0
-  ;;         solarized-height-plus-2 1.0
-  ;;         solarized-height-plus-3 1.0
-  ;;         solarized-height-plus-4 1.0))
-
-  ;; (use-package zenburn-theme
-  ;;   :init
-  ;;   (load-theme 'zenburn t))
 #+END_SRC
 
 ** Modeline
@@ -632,6 +600,44 @@
    "C-x o" 'ace-window)
 #+END_SRC
 
+** Prefer horizontal split
+   
+#+BEGIN_SRC emacs-lisp
+  (defun split-window-sensibly-prefer-horizontal (&optional window)
+    "Based on split-window-sensibly, but designed to prefer a horizontal split,
+  i.e. windows tiled side-by-side."
+    (let ((window (or window (selected-window))))
+      (or (and (window-splittable-p window t)
+	       ;; Split window horizontally
+	       (with-selected-window window
+		 (split-window-right)))
+	  (and (window-splittable-p window)
+	       ;; Split window vertically
+	       (with-selected-window window
+		 (split-window-below)))
+	  (and
+	   ;; If WINDOW is the only usable window on its frame (it is
+	   ;; the only one or, not being the only one, all the other
+	   ;; ones are dedicated) and is not the minibuffer window, try
+	   ;; to split it horizontally disregarding the value of
+	   ;; `split-height-threshold'.
+	   (let ((frame (window-frame window)))
+	     (or
+	      (eq window (frame-root-window frame))
+	      (catch 'done
+		(walk-window-tree (lambda (w)
+				    (unless (or (eq w window)
+						(window-dedicated-p w))
+				      (throw 'done nil)))
+				  frame)
+		t)))
+	   (not (window-minibuffer-p window))
+	   (let ((split-width-threshold 0))
+	     (when (window-splittable-p window t)
+	       (with-selected-window window
+		 (split-window-right))))))))
+#+END_SRC
+
 ** Golden ratio
 
 #+BEGIN_SRC emacs-lisp
@@ -752,6 +758,34 @@
 #+BEGIN_SRC emacs-lisp
   (use-package dash-at-point)
 #+END_SRC
+* Org
+** Evil Org
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-org
+    :after org
+    :config
+    (add-hook 'org-mode-hook 'evil-org-mode)
+    (add-hook 'evil-org-mode-hook
+	      (lambda ()
+		(evil-org-set-key-theme)))
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
+#+END_SRC
+
+** Config
+
+#+BEGIN_SRC emacs-lisp
+  ;; (with-eval-after-load 'org
+  ;;   (add-hook 'org-mode-hook '(lambda ()
+  ;;                               ;; make the lines wrap around edge of screen
+  ;;                               (visual-line-mode)
+  ;;                               (org-indent-mode)))
+
+  ;;   (setq evil-org-key-theme '(textobjects navigation additional insert todo))
+  ;;   )
+#+END_SRC
+
 * Tree
 ** Treemacs
 
@@ -856,132 +890,6 @@
   (yas-global-mode 1)
 #+END_SRC
 
-* Org
-** Evil Org
-
-#+BEGIN_SRC emacs-lisp
-  (use-package evil-org
-    :after org
-    :config
-    (add-hook 'org-mode-hook 'evil-org-mode)
-    (add-hook 'evil-org-mode-hook
-              (lambda ()
-                (evil-org-set-key-theme)))
-    (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys))
-#+END_SRC
-
-** Speed keys
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-use-speed-commands t)
-#+END_SRC
-
-** Hooks
-
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'org-mode-hook '(lambda ()
-                              ;; make the lines wrap around edge of screen
-                              (visual-line-mode)
-                              (org-indent-mode)))
-
-  (setq evil-org-key-theme '(textobjects navigation additional insert todo))
-
-  (defun disable-fylcheck-in-org-src-block ()
-    (flycheck-mode -1))
-
-  ;; (add-hook 'org-src-mode-hook 'disable-flycheck-in-org-src-block)
-#+END_SRC
-
-** Keybindings
-
-#+BEGIN_SRC emacs-lisp
-  (general-define-key
-   :keymaps 'org-mode-map
-   "C-c t" 'org-time-stamp-inactive
-   "C-c r" 'org-set-tags
-   "C-c g" 'org-update-statistics-cookies
-   "C-c a" 'org-archive-subtree)
-#+END_SRC
-
-** Log Done
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-log-done t)
-#+END_SRC
-
-** Agenda
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-directory "~/Dropbox/org")
-  (setq org-default-notes-file (concat org-directory "/notes.org"))
-  (setq org-agenda-files (list "~/Dropbox/org/todos.org"
-                               "~/Dropbox/org/assignments.org"
-                               "~/Dropbox/org/notes.org"
-                               "~/Dropbox/org/prodo.org"
-                               "~/Dropbox/org/did.org"
-                               ))
-
-  (defun org-agenda-show-agenda-and-todo (&optional arg)
-    (interactive "P")
-    (org-agenda arg "n"))
-#+END_SRC
-
-** Capture Templates
-
-#+BEGIN_SRC emacs-lisp
-  (require 'org)
-  (with-eval-after-load 'org
-    (setq org-capture-templates '())
-    (add-to-list 'org-capture-templates
-                 '("t" "Todo" entry
-                   (file "~/Dropbox/org/todos.org")
-                   "* TODO %^{What Do}"
-                   :empty-lines-after 1))
-    (add-to-list 'org-capture-templates
-                 '("d" "Did" entry
-                   (file+headline "~/Dropbox/org/did.org" "Did")
-                   "* %?\n%U"
-                   :prepend t
-                   :empty-lines 1))
-    (add-to-list 'org-capture-templates
-                 '("k" "Keep" entry
-                   (file+headline "~/Dropbox/org/keep.org" "Keep")
-                   "* %?\n%U"
-                   :prepend t
-                   :empty-lines 1))
-    (add-to-list 'org-capture-templates
-                 '("n" "Note" entry
-                   (file "~/Dropbox/org/notes.org")
-                   "* %^{Title}\n%U\n\n%?\n"
-                   :prepend t
-                   :empty-lines 1))
-    (add-to-list 'org-capture-templates
-                 '("a" "Assignment" entry
-                   (file+headline "~/Dropbox/org/assignments.org" "Assignments")
-                   "* TODO %^{Title} %^g\n DEADLINE: %^{Deadline}t\n"
-                   :prepend t
-                   :empty-lines 1)))
-#+END_SRC
-
-** Org Brain
-
-#+BEGIN_SRC emacs-lisp
-  (use-package org-brain
-    :init
-    (setq org-brain-path "~/Dropbox/org/brain")
-    ;; For Evil users
-    (with-eval-after-load 'evil
-      (evil-set-initial-state 'org-brain-visualize-mode 'emacs))
-    :config
-    (setq org-id-track-globally t)
-    (setq org-id-locations-file "~/.emacs.d/.org-id-locations")
-    (push '("b" "Brain" plain (function org-brain-goto-end)
-            "* %i%?" :empty-lines 1)
-          org-capture-templates)
-    (setq org-brain-visualize-default-choices 'all)
-    (setq org-brain-title-max-length 12))
-#+END_SRC
 * Autocompete
 
 #+BEGIN_SRC emacs-lisp
@@ -1010,39 +918,6 @@
   (general-define-key
    :keymaps '(insert)
    "C-SPC C-SPC" 'company-complete)
-#+END_SRC
-* Hydras
-
-#+BEGIN_SRC emacs-lisp
-  (use-package hydra)
-#+END_SRC
-
-** Text Size
-
-#+BEGIN_SRC emacs-lisp
-  (defhydra hydra-zoom nil
-    "zoom"
-    ("g" text-scale-increase "in")
-    ("l" text-scale-decrease "out"))
-#+END_SRC
-
-** Flycheck
-
-#+BEGIN_SRC emacs-lisp
-  (defhydra hydra-flycheck
-    (:pre (progn (setq hydra-lv t) (flycheck-list-errors))
-     :post (progn (setq hydra-lv nil) (quit-windows-on "*Flycheck errors*"))
-     :hint nil)
-    "Errors"
-    ("f"  flycheck-error-list-set-filter                            "Filter")
-    ("j"  flycheck-next-error                                       "Next")
-    ("k"  flycheck-previous-error                                   "Previous")
-    ("gg" flycheck-first-error                                      "First")
-    ("G"  (progn (goto-char (point-max)) (flycheck-previous-error)) "Last")
-    ("q"  nil))
-
-  (general-define-key
-   "C-x f" '(hydra-flycheck/body :which-key "hydra flycheck"))
 #+END_SRC
 * Key Frequency
 

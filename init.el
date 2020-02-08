@@ -7,7 +7,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (annalist auto-package-update glsl-mode graphql-mode prettier-js racket-mode auctex go-mode todotxt terraform-mode elixir-mode solarized-theme vue-mode writeroom-mode company-tabnine dad-joke zoom golden-ratio ace-popup-menu frog-jump-buffer zenburn-theme zenburn smartparens-mode smartparens evil-escape cargo indium paradox sublimity gist gh logito pcache rust-mode yasnippet-snippets treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil treemacs dash-at-point all-the-icons-dired all-the-icons-dired-mode dired-x dired-details dired-dired+ dired+ drag-stuff move-text ace-window emojify doom-modeline atom-one-dark-theme all-the-icons evil-surround use-package)))
+    (annalist auto-package-update glsl-mode graphql-mode prettier-js racket-mode auctex go-mode todotxt terraform-mode elixir-mode solarized-theme vue-mode writeroom-mode company-tabnine dad-joke zoom golden-ratio ace-popup-menu frog-jump-buffer zenburn-theme zenburn smartparens-mode smartparens evil-escape cargo paradox sublimity gist gh logito pcache rust-mode yasnippet-snippets treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil treemacs dash-at-point all-the-icons-dired all-the-icons-dired-mode dired-x dired-details dired-dired+ dired+ drag-stuff move-text ace-window emojify doom-modeline atom-one-dark-theme all-the-icons evil-surround use-package)))
  '(safe-local-variable-values (quote ((TeX-engine . xetex))))
  '(treemacs-collapse-dirs 3)
  '(treemacs-filewatch-mode t)

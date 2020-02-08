@@ -163,3 +163,5 @@ transient
 secret.el
 
 .lsp-session*
+
+.last-package-update-day
